@@ -161,11 +161,11 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
             });
         }
 
-        if (!discord) {
+        if (!discord && !bypassDiscord) {
             return interaction.editReply({
                 embeds: [
                     errorEmbed(
-                        `There is no linked discord on Hypixel for the account \`${mojang.name}\`.`
+                        `There is no linked discord on Hypixel for the account \`${mojang.name}\`. Set bypass_discord to true to bypass this check.`
                     ),
                 ],
             });
@@ -184,7 +184,17 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
         let roles = member.roles as GuildMemberRoleManager
         let rolesArray = this.arrayRoleIds(roles)
 
-        let profile = highestCataProfile(await this.hypixel.skyblock.profiles.uuid(mojang.id), mojang.id)
+        let profile;
+        try {
+            profile = highestCataProfile(await this.hypixel.skyblock.profiles.uuid(mojang.id), mojang.id)
+        } catch (error: any) {
+            console.error(error);
+            return interaction.editReply({
+                embeds: [
+                    errorEmbed("There was an error while accessing the Hypixel API: " + error.message),
+                ],
+            });
+        }
 
         let dungeons;
 

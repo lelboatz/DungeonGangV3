@@ -89,7 +89,17 @@ module.exports = class VerifyCommand extends BaseCommand {
         let roles = interaction.member?.roles as GuildMemberRoleManager
         let rolesArray = this.arrayRoleIds(roles)
 
-        let profile = highestCataProfile(await this.hypixel.skyblock.profiles.uuid(mojang.id), mojang.id)
+        let profile;
+        try {
+            profile = highestCataProfile(await this.hypixel.skyblock.profiles.uuid(mojang.id), mojang.id)
+        } catch (error: any) {
+            console.error(error);
+            return interaction.editReply({
+                embeds: [
+                    errorEmbed("There was an error while accessing the Hypixel API: " + error.message),
+                ],
+            });
+        }
 
         let dungeons;
 

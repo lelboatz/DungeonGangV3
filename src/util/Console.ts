@@ -86,10 +86,14 @@ function clean(text: any) {
 }
 
 process.on('uncaughtException', err => {
-    console.log(err.stack, true)
+    console.exception(err.stack, true)
     process.exit(1)
 })
 
 process.on('unhandledRejection', err => {
-    console.log(err.stack)
+    console.error(err.stack)
+})
+
+process.on('warning', err => {
+    console.warn(err.stack)
 })

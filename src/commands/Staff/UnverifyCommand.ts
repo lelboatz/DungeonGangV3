@@ -36,20 +36,18 @@ module.exports = class UnverifyCommand extends BaseCommand {
             });
         }
 
-        const roles = this.arrayRoleIds(member.roles);
-
-        roles.forEach(role => {
-            if (!this.client.config.discord.roles.fixRoles.includes(role)) {
-                roles.splice(roles.indexOf(role), 1);
-            }
-        });
+        if (!member.manageable) {
+            return interaction.editReply({
+                embeds: [errorEmbed("You cannot unverify someone with a role that is higher than the bot!")]
+            });
+        }
 
         if (await this.mongo.getUserByDiscord(member.user.id)) {
             await this.mongo.deleteUserByDiscord(member.user.id);
         }
 
         await member.edit({
-            roles: roles,
+            roles: this.client.config.discord.roles.fixRoles,
             nick: member.manageable ? null: undefined,
         }, `Unverified by ${interaction.user.tag}`);
 
