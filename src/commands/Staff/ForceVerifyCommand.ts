@@ -251,18 +251,6 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
             }
         }
 
-        if (tpp && !rolesArray.includes(this.client.config.discord.roles.topPlayer.plus)) {
-            rolesArray.push(this.client.config.discord.roles.topPlayer.plus)
-        }
-
-        if (tp && !rolesArray.includes(this.client.config.discord.roles.topPlayer.normal)) {
-            rolesArray.push(this.client.config.discord.roles.topPlayer.normal)
-        }
-
-        if (tpm && !rolesArray.includes(this.client.config.discord.roles.topPlayer.minus)) {
-            rolesArray.push(this.client.config.discord.roles.topPlayer.minus)
-        }
-
         for (const [, value] of Object.entries(this.client.config.discord.roles.cata)) {
             if (rolesArray.includes(value)) {
                 rolesArray.splice(rolesArray.indexOf(value), 1)
@@ -275,6 +263,18 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
             rolesArray.splice(rolesArray.indexOf(this.client.config.discord.roles.topPlayer.normal), 1)
         } else if (rolesArray.includes(this.client.config.discord.roles.topPlayer.minus)) {
             rolesArray.splice(rolesArray.indexOf(this.client.config.discord.roles.topPlayer.minus), 1)
+        }
+
+        if (tpp && !rolesArray.includes(this.client.config.discord.roles.topPlayer.plus)) {
+            rolesArray.push(this.client.config.discord.roles.topPlayer.plus)
+        }
+
+        if (tp && !rolesArray.includes(this.client.config.discord.roles.topPlayer.normal)) {
+            rolesArray.push(this.client.config.discord.roles.topPlayer.normal)
+        }
+
+        if (tpm && !rolesArray.includes(this.client.config.discord.roles.topPlayer.minus)) {
+            rolesArray.push(this.client.config.discord.roles.topPlayer.minus)
         }
 
         if (dungeons.cataLevel < 30 || dungeons.cataLevel > 60) {

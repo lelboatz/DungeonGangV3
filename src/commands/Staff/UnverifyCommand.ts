@@ -42,6 +42,12 @@ module.exports = class UnverifyCommand extends BaseCommand {
             });
         }
 
+        if (member.roles.botRole) {
+            return interaction.editReply({
+                embeds: [errorEmbed("You cannot unverify a bot with a managed role!")]
+            });
+        }
+
         if (await this.mongo.getUserByDiscord(member.user.id)) {
             await this.mongo.deleteUserByDiscord(member.user.id);
         }
