@@ -1,0 +1,41 @@
+{
+  "name": "dungeongang",
+  "version": "1.0.0",
+  "description": "Dungeon Gang bot made by nick & tony.",
+  "main": "build/index.js",
+  "scripts": {
+    "start": "npm run build && node build/index.js",
+    "build": "npm run clean && tsc -p tsconfig.json",
+    "clean": "rimraf build",
+    "eslint:fix": "eslint --fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lelboatz/DungeonGangV3.git"
+  },
+  "author": "nick & tony",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lelboatz/DungeonGangV3/issues"
+  },
+  "homepage": "https://github.com/lelboatz/DungeonGangV3#readme",
+  "devDependencies": {
+    "@tsconfig/node16": "^1.0.2",
+    "@types/klaw": "^3.0.3",
+    "@typescript-eslint/eslint-plugin": "^5.8.1",
+    "@typescript-eslint/parser": "^5.8.1",
+    "eslint": "^8.5.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.5.4"
+  },
+  "dependencies": {
+    "@zikeji/hypixel": "^3.1.1",
+    "axios": "^0.24.0",
+    "discord.js": "^13.4.0",
+    "klaw": "^4.0.1",
+    "mongodb": "^4.2.2",
+    "node-fetch": "^3.1.0"
+  }
+}

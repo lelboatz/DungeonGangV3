@@ -1,0 +1,88 @@
+{
+  "discord": {
+    "guildId": "", // Dungeon Gang Server ID
+    "token": "", // Bot Token
+    "botAdmin": ["", ""], // User IDs of bot admins
+    "commandChannels": ["", ""], // Command Channel IDs
+    "whitelistedChannels": ["", ""], // Channel IDs where commands wont be ephemeral
+    "lfgChannels": ["", ""], // Channel IDs where LFG messages are sent
+    "verifyChannels": ["", ""], // Verify & Update channels
+    "logChannel": "", // Dungeon gang log channel
+    "symbols": { // Staff symbols
+      "ownerRoleId": "⬙",
+      "coOwnerRoleId": "⬘",
+      "headAdminRoleId": "⬖",
+      "adminRoleId": "⟐",
+      "seniorModeratorRoleId": "❃",
+      "moderatorRoleId": "✻",
+      "helperRoleId": "♔"
+    },
+    "roles": {
+      "staff": { // Staff role ids
+        "owner": "",
+        "coOwner": "",
+        "headAdmin": "",
+        "admin": "",
+        "seniorModerator": "",
+        "moderator": "",
+        "helper": "",
+        "staffRole": "",
+        "managerRole": "",
+        "pollPing": ""
+      },
+      "cata": { // Cata role ids
+        "30": "",
+        "35": "",
+        "40": "",
+        "41": "",
+        "42": "",
+        "43": "",
+        "44": "",
+        "45": "",
+        "46": "",
+        "47": "",
+        "48": "",
+        "49": "",
+        "50": "",
+        "51": "",
+        "52": "",
+        "53": "",
+        "54": "",
+        "55": "",
+        "56": "",
+        "57": "",
+        "58": "",
+        "59": "",
+        "60": ""
+      },
+      "topPlayer": { // Top player role ids
+        "plus": "",
+        "normal": "",
+        "minus": "",
+        "votedOut": "",
+        "plusReq": "",
+        "topReq": ""
+      },
+      "class": { // Class role ids
+        "archer": "",
+        "mage": "",
+        "berserk": "",
+        "healer": "",
+        "tank": ""
+      },
+      "misc": { // Misc role ids
+        "speedRunner": "",
+        "secretDuper": ""
+      },
+      "fixRoles": ["", ""], // Roles that will be given with the /fix command
+      "member": "" // Member role id
+    }
+  },
+  "minecraft": {
+    "apiKey": "" // Api key
+  },
+  "mongo": {
+    "uri": "", // Mongo DB url
+    "db": "" // Mongo DB name
+  }
+}
