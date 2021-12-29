@@ -1,32 +1,33 @@
-import { DungeonGang } from "../../index";
 import BaseCommand from "../BaseCommand";
+import { DungeonGang } from "../../index";
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { CommandInteraction, Guild } from "discord.js";
 import { embed, ephemeralMessage, errorEmbed } from "../../util/Functions";
 
-module.exports = class FixCommand extends BaseCommand {
+module.exports = class UnverifyCommand extends BaseCommand {
     constructor(client: DungeonGang) {
         super(client, {
-            name: "fix",
+            name: "unverify",
             category: "Staff",
-            description: "Fixes a user's roles.",
-            usage: "fix <user>",
+            usage: "unverify <user>",
+            description: "Unverifies a user.",
             guildOnly: true,
             permLevel: 1,
             slashCommandBody: new SlashCommandBuilder()
-                .setName("fix")
-                .setDescription("Fixes a user's roles.")
+                .setName("unverify")
+                .setDescription("Unverifies a user.")
                 .addUserOption(option => option
                     .setName("user")
                     .setRequired(true)
-                    .setDescription("The user to fix.")
+                    .setDescription("The user to unverify.")
                 )
-        });
+        })
     }
     async execute(interaction: CommandInteraction) {
         await interaction.deferReply({
             ephemeral: ephemeralMessage(interaction.channelId)
         })
+
         const user = interaction.options.getUser("user", true);
         const member = await this.fetchMember(user.id, interaction.guild as Guild);
         if (!member) {
@@ -34,16 +35,27 @@ module.exports = class FixCommand extends BaseCommand {
                 embeds: [errorEmbed("That user is not in this server.")]
             });
         }
-        let roles = this.arrayRoleIds(member.roles);
 
-        roles = this.removeDuplicates(roles.concat(this.client.config.discord.roles.fixRoles))
+        const roles = this.arrayRoleIds(member.roles);
+
+        roles.forEach(role => {
+            if (!this.client.config.discord.roles.fixRoles.includes(role)) {
+                roles.splice(roles.indexOf(role), 1);
+            }
+        });
+
+        if (await this.mongo.getUserByDiscord(member.user.id)) {
+            await this.mongo.deleteUserByDiscord(member.user.id);
+        }
 
         await member.edit({
-            roles
-        }, `Roles fixed by ${interaction.user.tag}`);
+            roles: roles,
+            nick: member.manageable ? null: undefined,
+        }, `Unverified by ${interaction.user.tag}`);
+
         return interaction.editReply({
             embeds: [
-                embed("Success!", `<@${member.user.id}>'s roles have been fixed.`)
+                embed("Unverified!", `<@${member.user.id}> has been successfully unverified.`)
             ]
         })
     }

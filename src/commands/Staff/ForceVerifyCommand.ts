@@ -129,7 +129,7 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
             await member.edit({
                 roles,
                 nick: member.manageable ? nickname : undefined
-            })
+            }, `Force verified by ${interaction.user.tag}`)
 
             return interaction.editReply({
                 embeds: [
@@ -300,7 +300,7 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
         await member.edit({
             nick: member.manageable ? nickname : undefined,
             roles: rolesArray,
-        })
+        }, `Force verified by ${interaction.user.tag}`)
 
         const verified = `Successfully force verified <@${member.user.id}> as \`${mojang.name}\`!`
             + "\n\n__**Stats Overview**__"

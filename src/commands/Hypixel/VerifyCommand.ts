@@ -206,7 +206,7 @@ module.exports = class VerifyCommand extends BaseCommand {
         await member.edit({
             nick: member.manageable ? nickname : undefined,
             roles: rolesArray,
-        })
+        }, `Verified as ${mojang.name}`)
 
         const verified = `Successfully verified as \`${mojang.name}\`!`
         + "\n\n__**Stats Overview**__"

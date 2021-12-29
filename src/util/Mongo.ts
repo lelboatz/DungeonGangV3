@@ -67,4 +67,9 @@ export default class MongoUtils {
         // @ts-ignore
         return this.mongo?.collection("users").findOne({ _id: id })
     }
+
+    deleteUserByDiscord(id: Snowflake) {
+        // @ts-ignore
+        return this.mongo?.collection("users").deleteOne({ _id: id })
+    }
 }
