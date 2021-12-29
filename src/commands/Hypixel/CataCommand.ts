@@ -2,7 +2,7 @@ import BaseCommand from "../BaseCommand";
 import { DungeonGang } from "../../index";
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { CommandInteraction, MessageEmbed } from "discord.js";
-import { cataLevel, ephemeralMessage, errorEmbed, fmtMSS, getMojang, highestCataProfile } from "../../util/Functions";
+import { cataLevel, ephemeralMessage, errorEmbed, fmtMSS, getMojang, highestCataProfile, cataXp as cataLevels } from "../../util/Functions";
 
 module.exports = class CataCommand extends BaseCommand {
     constructor(client: DungeonGang) {
@@ -60,24 +60,30 @@ module.exports = class CataCommand extends BaseCommand {
         if (!profile) {
             dungeons = {
                 cataLevel: 0,
+                cataXp: 0,
                 secrets: player.achievements.skyblock_treasure_hunter ?? 0,
                 bloodMobs: 0,
                 floorSeven: undefined,
+                masterFour: undefined,
                 masterFive: undefined,
                 masterSix: undefined,
                 floorSevenCompletions: 0,
+                masterFourCompletions: 0,
                 masterFiveCompletions: 0,
                 masterSixCompletions: 0
             }
         } else {
             dungeons = {
                 cataLevel: cataLevel(profile.members[mojang.id].dungeons?.dungeon_types.catacombs.experience!).toFixed(2),
+                cataXp: profile.members[mojang.id].dungeons?.dungeon_types.catacombs.experience!,
                 secrets: player.achievements.skyblock_treasure_hunter ?? 0,
                 bloodMobs: (profile.members[mojang.id].stats.kills_watcher_summon_undead ?? 0) + (profile.members[mojang.id].stats.kills_watcher_summon_skeleton ?? 0) + (profile.members[mojang.id].stats.kills_master_watcher_summon_undead ?? 0),
                 floorSeven: profile.members[mojang.id].dungeons?.dungeon_types.catacombs.fastest_time_s_plus?.[7] ?? undefined,
+                masterFour: profile.members[mojang.id].dungeons?.dungeon_types.catacombs.fastest_time_s_plus?.[4] ?? undefined,
                 masterFive: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs.fastest_time_s_plus?.[5] ?? undefined,
                 masterSix: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs.fastest_time_s_plus?.[6] ?? undefined,
                 floorSevenCompletions: profile.members[mojang.id].dungeons?.dungeon_types.catacombs.tier_completions?.[7] ?? 0,
+                masterFourCompletions: profile.members[mojang.id].dungeons?.dungeon_types.catacombs.tier_completions?.[4] ?? 0,
                 masterFiveCompletions: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs.tier_completions?.[5] ?? 0,
                 masterSixCompletions: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs.tier_completions?.[6] ?? 0
             }
@@ -129,13 +135,14 @@ module.exports = class CataCommand extends BaseCommand {
                         iconURL: `https://crafatar.com/avatars/${mojang.id}?overlay`
                     })
                     .setThumbnail(this.client.user?.avatarURL()?.toString()!)
-                    .addField("Catacombs Level", dungeons.cataLevel.toString(), true)
-                    .addField("Secrets", this.formatter.format(dungeons.secrets), true)
-                    .addField("Blood Mob Kills", this.formatter.format(dungeons.bloodMobs), true)
-                    .addField("Floor 7", "S+ PB: " + (dungeons.floorSeven ? fmtMSS(dungeons.floorSeven) : "N/A") + "\nCompletions: " + dungeons.floorSevenCompletions, true)
-                    .addField("Master 5", "S+ PB: " + (dungeons.masterFive ? fmtMSS(dungeons.masterFive) : "N/A") + "\nCompletions: " + dungeons.masterFiveCompletions, true)
-                    .addField("Master 6", "S+ PB: " + (dungeons.masterSix ? fmtMSS(dungeons.masterSix) : "N/A") + "\nCompletions: " + dungeons.masterSixCompletions, true)
-                    .addField("Qualifications",
+                    .addField("**Catacombs Level**", dungeons.cataLevel.toString() + ` [${this.formatter.format(Math.floor(dungeons.cataXp - cataLevels[Math.floor(parseFloat(dungeons.cataLevel.toString()))][1]))}/${this.formatter.format(cataLevels[Math.floor(parseFloat(dungeons.cataLevel.toString())) + 1][1] - cataLevels[Math.floor(parseFloat(dungeons.cataLevel.toString()))][1])}]`, false)
+                    .addField("**Secrets**", this.formatter.format(dungeons.secrets), true)
+                    .addField("**Blood Mob Kills**", this.formatter.format(dungeons.bloodMobs), true)
+                    .addField("**Floor 7**", "S+ PB: " + (dungeons.floorSeven ? fmtMSS(dungeons.floorSeven) : "N/A") + "\nCompletions: " + dungeons.floorSevenCompletions, true)
+                    .addField("**Master 4**", "S+ PB: " + (dungeons.masterFour ? fmtMSS(dungeons.masterFour) : "N/A") + "\nCompletions: " + dungeons.masterFourCompletions, true)
+                    .addField("**Master 5**", "S+ PB: " + (dungeons.masterFive ? fmtMSS(dungeons.masterFive) : "N/A") + "\nCompletions: " + dungeons.masterFiveCompletions, true)
+                    .addField("**Master 6**", "S+ PB: " + (dungeons.masterSix ? fmtMSS(dungeons.masterSix) : "N/A") + "\nCompletions: " + dungeons.masterSixCompletions, true)
+                    .addField("**Qualifications**",
                         `<@&${this.client.config.discord.roles.topPlayer.minus}> ${tpm}\n` +
                         `<@&${this.client.config.discord.roles.topPlayer.normal}> ${tp}\n` +
                         `<@&${this.client.config.discord.roles.topPlayer.plus}> ${tpp}\n` +

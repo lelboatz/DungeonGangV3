@@ -1,7 +1,7 @@
 import BaseCommand from "../BaseCommand";
-import { DungeonGang } from "../../index";
+import { client, DungeonGang } from "../../index";
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { CommandInteraction, GuildMember, GuildMemberRoleManager } from "discord.js";
+import { CommandInteraction, GuildMember, GuildMemberRoleManager, MessageEmbed } from "discord.js";
 import { cataLevel, embed, errorEmbed, fmtMSS, getMojang, highestCataProfile } from "../../util/Functions";
 import { userSchema } from "../../util/Schema";
 import { MongoUser } from "../../util/Mongo";
@@ -124,7 +124,7 @@ module.exports = class VerifyCommand extends BaseCommand {
         }
 
         let member = interaction.member as GuildMember;
-        let tpp = false, tp = false, tpm = false;
+        let tpp = false, tp = false, tpm = false, speedrunner = false;
 
         if ((dungeons.secrets >= 20000 || dungeons.bloodMobs >= 45000) && dungeons.cataLevel >= 48 && dungeons.masterSix) {
             if (dungeons.masterSix <= 195000 && !member.roles.cache.has(this.client.config.discord.roles.topPlayer.votedOut)) {
@@ -157,6 +157,12 @@ module.exports = class VerifyCommand extends BaseCommand {
             }
         }
 
+        if (dungeons.masterSix) {
+            if (dungeons.masterSix <= 300000) {
+                speedrunner = true;
+            }
+        }
+
         for (const [, value] of Object.entries(this.client.config.discord.roles.cata)) {
             if (rolesArray.includes(value)) {
                 rolesArray.splice(rolesArray.indexOf(value), 1)
@@ -181,6 +187,10 @@ module.exports = class VerifyCommand extends BaseCommand {
 
         if (tpm && !rolesArray.includes(this.client.config.discord.roles.topPlayer.minus)) {
             rolesArray.push(this.client.config.discord.roles.topPlayer.minus)
+        }
+
+        if (speedrunner && !rolesArray.includes(this.client.config.discord.roles.misc.speedRunner)) {
+            rolesArray.push(this.client.config.discord.roles.misc.speedRunner)
         }
 
         if (dungeons.cataLevel < 30 || dungeons.cataLevel > 60) {
@@ -218,18 +228,22 @@ module.exports = class VerifyCommand extends BaseCommand {
             roles: rolesArray,
         }, `Verified as ${mojang.name}`)
 
-        const verified = `Successfully verified as \`${mojang.name}\`!`
-        + "\n\n__**Stats Overview**__"
-        + "\nCatacombs Level: " + dungeons.cataLevel
+        const stats = "Catacombs Level: " + dungeons.cataLevel
         + "\nSecrets: " + dungeons.secrets
-        + "\nBlood Mobs: " + dungeons.bloodMobs
-        + "\nFloor 7 S+: " + (dungeons.floorSeven ? fmtMSS(dungeons.floorSeven!) : "None")
-        + "\nMaster Five S+: " + (dungeons.masterFive ? fmtMSS(dungeons.masterFive!) : "None")
-        + "\nMaster Six S+: " + (dungeons.masterSix ? fmtMSS(dungeons.masterSix!) : "None")
+        + "\nBlood Mob Kills: " + dungeons.bloodMobs
+        + "\nFloor 7 S+: " + (dungeons.floorSeven ? fmtMSS(dungeons.floorSeven!) : "N/A")
+        + "\nMaster Five S+: " + (dungeons.masterFive ? fmtMSS(dungeons.masterFive!) : "N/A")
+        + "\nMaster Six S+: " + (dungeons.masterSix ? fmtMSS(dungeons.masterSix!) : "N/A")
 
         return interaction.editReply({
             embeds: [
-                embed("Verified!", verified)
+                new MessageEmbed()
+                    .setTitle(`Verified!`)
+                    .setDescription(`Successfully verified as \`${mojang.name}\`!`)
+                    .addField("**Stats Overview**", stats)
+                    .setFooter(client.user?.username as string, client.user?.avatarURL()?.toString())
+                    .setColor("#05e318")
+                    .setTimestamp()
             ]
         })
 

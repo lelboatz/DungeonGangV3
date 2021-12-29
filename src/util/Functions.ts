@@ -53,7 +53,7 @@ function ephemeralMessage(channelId: Snowflake) {
 
 }
 
-let cataXp = [
+export let cataXp = [
     [0, 0],
     [1, 50],
     [2, 125],
@@ -134,6 +134,16 @@ function cataLevel(xp: number) {
     return level + percentage - 1;
 }
 
+function cataExp(level: number) {
+    if (Number.isInteger(level)) {
+        return cataXp[level][1]
+    }
+    let xp = cataXp[Math.floor(level)][1]
+    let decimal = Math.abs(level) - Math.floor(Math.abs(level))
+    xp += (decimal * (cataXp[Math.floor(level) + 1][1] - cataXp[Math.floor(level)][1]))
+    return xp;
+}
+
 function highestCataProfile(profiles: Components.Schemas.SkyBlockProfileCuteName[] & {meta: Omit<Paths.SkyblockProfiles.Get.Responses.$200, "profiles"> & DefaultMeta}, uuid: string) {
     try {
         let highestCataXp = -1;
@@ -161,4 +171,4 @@ function fmtMSS(number: number) {
 }
 
 
-export { getMojang, errorEmbed, ephemeralMessage, highestCataProfile, cataLevel, embed, fmtMSS }
+export { getMojang, errorEmbed, ephemeralMessage, highestCataProfile, cataLevel, embed, fmtMSS, cataExp }
