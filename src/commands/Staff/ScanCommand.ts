@@ -52,7 +52,7 @@ module.exports = class ScanCommand extends BaseCommand {
         })
 
         const role = interaction.options.getRole("role", true) as Role
-        const channel = interaction.options.getChannel("channel")
+        let channel = interaction.options.getChannel("channel")
         const guild = interaction.guild as Guild
         let bypassDiscord = false;
 
@@ -62,6 +62,10 @@ module.exports = class ScanCommand extends BaseCommand {
                     errorEmbed(`The channel must be a text channel.`)
                 ]
             })
+        }
+
+        if (!channel) {
+            channel = await guild.channels.fetch(this.client.config.discord.logChannel) as TextChannel
         }
 
         let members = await guild.members.fetch()
