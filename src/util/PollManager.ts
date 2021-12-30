@@ -92,7 +92,7 @@ class PollManager {
             message = await pollChannel.send({
                 embeds: [
                     {
-                        "color": 5675786,
+                        "color": "#B5FF59",
                         "footer": {
                             "icon_url": this.client.user?.avatarURL()?.toString(),
                             "text": "Dungeon Gang Polls"
@@ -230,7 +230,7 @@ class PollManager {
                 await message.edit({
                     embeds: [
                         {
-                            "color": 5675786,
+                            "color": "#B5FF59",
                             "footer": {
                                 "icon_url": this.client.user?.avatarURL()?.toString(),
                                 "text": "Dungeon Gang Polls"

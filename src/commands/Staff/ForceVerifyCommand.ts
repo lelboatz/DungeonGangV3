@@ -251,12 +251,16 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
         try {
             profile = highestCataProfile(await this.hypixel.skyblock.profiles.uuid(mojang.id), mojang.id)
         } catch (error: any) {
-            console.error(error);
-            return interaction.editReply({
-                embeds: [
-                    errorEmbed("There was an error while accessing the Hypixel API: " + error.message),
-                ],
-            });
+            if (error.message === 'Key "profiles" is not an array.') {
+                profile = undefined
+            } else {
+                console.error(error);
+                return interaction.editReply({
+                    embeds: [
+                        errorEmbed("There was an error while accessing the Hypixel API: " + error.message),
+                    ],
+                });
+            }
         }
 
         let dungeons;
@@ -283,7 +287,7 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
 
         let tpp = false, tp = false, tpm = false, speedrunner = false;
 
-        if ((dungeons.secrets >= 20000 || dungeons.bloodMobs >= 45000) && dungeons.cataLevel >= 48 && dungeons.masterSix) {
+        if ((dungeons.secrets >= 50000 || dungeons.bloodMobs >= 45000) && dungeons.cataLevel >= 48 && dungeons.masterSix) {
             if (dungeons.masterSix <= 195000 && !member.roles.cache.has(this.client.config.discord.roles.topPlayer.votedOut)) {
                 tpp = true;
             }
@@ -293,7 +297,7 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
             tpp = true;
         }
 
-        if (!tpp && dungeons.cataLevel >= 45 && dungeons.secrets > 30000 && (dungeons.floorSeven || dungeons.masterFive || dungeons.masterSix)) {
+        if (!tpp && dungeons.cataLevel >= 45 && dungeons.secrets >= 30000 && (dungeons.floorSeven || dungeons.masterFive || dungeons.masterSix)) {
             if (dungeons.floorSeven && dungeons.floorSeven <= 225000) {
                 tp = true;
             }
@@ -305,7 +309,7 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
             }
         }
 
-        if ((!tp && !tpp) && dungeons.cataLevel >= 42 && dungeons.secrets > 20000 && (dungeons.floorSeven || dungeons.masterFive)) {
+        if ((!tp && !tpp) && dungeons.cataLevel >= 42 && dungeons.secrets >= 20000 && (dungeons.floorSeven || dungeons.masterFive)) {
             if (dungeons.floorSeven && dungeons.floorSeven <= 260000) {
                 tpm = true;
             }
@@ -315,7 +319,7 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
         }
 
         if (dungeons.masterSix) {
-            if (dungeons.masterSix <= 300000) {
+            if (dungeons.masterSix <= 180000) {
                 speedrunner = true;
             }
         }
@@ -410,7 +414,7 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
                     .setDescription(`Successfully force verified <@${member.user.id}> as \`${mojang.name}\`!`)
                     .addField("**Stats Overview**", stats)
                     .setFooter(client.user?.username as string, client.user?.avatarURL()?.toString())
-                    .setColor("#05e318")
+                    .setColor("#B5FF59")
                     .setTimestamp()
             ]
         })

@@ -113,19 +113,21 @@ module.exports = class CalcCommand extends BaseCommand {
 
             endUsername = mojang.name;
 
-            let profiles;
+            let profile;
             try {
-                profiles = await this.hypixel.skyblock.profiles.uuid(mojang.id);
+                profile = highestCataProfile(await this.hypixel.skyblock.profiles.uuid(mojang.id), mojang.id)
             } catch (error: any) {
-                console.error(error);
-                return interaction.editReply({
-                    embeds: [
-                        errorEmbed("There was an error while accessing the Hypixel API: " + error.message),
-                    ],
-                });
+                if (error.message === 'Key "profiles" is not an array.') {
+                    profile = undefined
+                } else {
+                    console.error(error);
+                    return interaction.editReply({
+                        embeds: [
+                            errorEmbed("There was an error while accessing the Hypixel API: " + error.message),
+                        ],
+                    });
+                }
             }
-
-            let profile = highestCataProfile(profiles, mojang.id);
 
             if (!profile) {
                 end = 0;
@@ -150,7 +152,7 @@ module.exports = class CalcCommand extends BaseCommand {
             embeds: [
                 {
                     title: `Catacombs XP Calculator`,
-                    color: "#05e318",
+                    color: "#B5FF59",
                     description: `Level **${startLevel.toFixed(2)}** to Level **${endLevel.toFixed(2)}**`,
                     fields: [
                         {

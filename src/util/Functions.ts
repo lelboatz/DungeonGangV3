@@ -27,7 +27,7 @@ function embed(title: string, description: string) {
     return new MessageEmbed()
         .setTitle(title)
         .setDescription(description)
-        .setColor("#05e318")
+        .setColor("#B5FF59")
         .setTimestamp()
         .setFooter(client.user?.username as string, client.user?.avatarURL()?.toString());
 }

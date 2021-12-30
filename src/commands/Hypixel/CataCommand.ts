@@ -40,20 +40,22 @@ module.exports = class CataCommand extends BaseCommand {
         }
 
         let player;
-        let profiles;
+        let profile;
         try {
             player = await this.hypixel.player.uuid(mojang.id);
-            profiles = await this.hypixel.skyblock.profiles.uuid(mojang.id);
+            profile = highestCataProfile(await this.hypixel.skyblock.profiles.uuid(mojang.id), mojang.id)
         } catch (error: any) {
-            console.error(error);
-            return interaction.editReply({
-                embeds: [
-                    errorEmbed("There was an error while accessing the Hypixel API: " + error.message),
-                ],
-            });
+            if (error.message === 'Key "profiles" is not an array.' && player) {
+                profile = undefined
+            } else {
+                console.error(error);
+                return interaction.editReply({
+                    embeds: [
+                        errorEmbed("There was an error while accessing the Hypixel API: " + error.message),
+                    ],
+                });
+            }
         }
-
-        let profile = highestCataProfile(profiles, mojang.id);
 
         let dungeons;
 
@@ -93,13 +95,13 @@ module.exports = class CataCommand extends BaseCommand {
 
         let tpm = NO, tp = NO, tpp = NO, speedrunner = NO, votedOut = NO;
 
-        if ((dungeons.secrets >= 20000 || dungeons.bloodMobs >= 45000) && dungeons.cataLevel >= 48 && dungeons.masterSix) {
+        if ((dungeons.secrets >= 50000 || dungeons.bloodMobs >= 45000) && dungeons.cataLevel >= 48 && dungeons.masterSix) {
             if (dungeons.masterSix <= 195000) {
                 tpp = YES;
             }
         }
 
-        if ((tpp === NO) && dungeons.cataLevel >= 45 && dungeons.secrets > 30000 && (dungeons.floorSeven || dungeons.masterFive || dungeons.masterSix)) {
+        if ((tpp === NO) && dungeons.cataLevel >= 45 && dungeons.secrets >= 30000 && (dungeons.floorSeven || dungeons.masterFive || dungeons.masterSix)) {
             if (dungeons.floorSeven && dungeons.floorSeven <= 225000) {
                 tp = YES;
             }
@@ -111,7 +113,7 @@ module.exports = class CataCommand extends BaseCommand {
             }
         }
 
-        if ((tp === NO && tpp === NO) && dungeons.cataLevel >= 42 && dungeons.secrets > 20000 && (dungeons.floorSeven || dungeons.masterFive)) {
+        if ((tp === NO && tpp === NO) && dungeons.cataLevel >= 42 && dungeons.secrets >= 20000 && (dungeons.floorSeven || dungeons.masterFive)) {
             if (dungeons.floorSeven && dungeons.floorSeven <= 260000) {
                 tpm = YES;
             }
@@ -150,7 +152,7 @@ module.exports = class CataCommand extends BaseCommand {
                         `<@&${this.client.config.discord.roles.topPlayer.votedOut}> ${NO}`, false
                     )
                     .setFooter(this.client.user?.username as string, this.client.user?.avatarURL()?.toString())
-                    .setColor("#05e318")
+                    .setColor("#B5FF59")
             ]
         })
     }
