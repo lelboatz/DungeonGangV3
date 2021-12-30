@@ -30,7 +30,7 @@ module.exports = class ScanCommand extends BaseCommand {
             category: "Staff",
             usage: "scan <role>",
             guildOnly: true,
-            permLevel: 1,
+            permLevel: 2,
             slashCommandBody: new SlashCommandBuilder()
                 .setName("scan")
                 .setDescription("Scans a role for members and adds them to the database.")

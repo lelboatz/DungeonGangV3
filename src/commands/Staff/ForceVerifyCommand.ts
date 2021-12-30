@@ -22,7 +22,7 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
             usage: "forceverify <user>",
             description: "Force a user to verify.",
             guildOnly: true,
-            permLevel: 1,
+            permLevel: 2,
             slashCommandBody: new SlashCommandBuilder()
                 .setName("forceverify")
                 .setDescription("Force a user to verify.")

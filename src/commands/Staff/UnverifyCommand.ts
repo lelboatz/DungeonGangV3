@@ -13,7 +13,7 @@ module.exports = class UnverifyCommand extends BaseCommand {
             usage: "unverify <user>",
             description: "Unverifies a user.",
             guildOnly: true,
-            permLevel: 1,
+            permLevel: 2,
             slashCommandBody: new SlashCommandBuilder()
                 .setName("unverify")
                 .setDescription("Unverifies a user.")
