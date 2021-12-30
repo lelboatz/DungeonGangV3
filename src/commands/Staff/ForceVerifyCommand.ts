@@ -48,6 +48,10 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
                     .setName("api_check")
                     .setDescription("Whether to check the API for the user's Cata level & Role qualifications.")
                 )
+                .addBooleanOption(option => option
+                    .setName("override_duplicate")
+                    .setDescription("Whether to override a duplicate user.")
+                )
         });
     }
     async execute(interaction: CommandInteraction) {
@@ -60,6 +64,7 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
         const cataLevel = interaction.options.getInteger("cata_level");
         const apiCheck = interaction.options.getBoolean("api_check");
         const bypassDiscord = interaction.options.getBoolean("bypass_discord");
+        const overrideDuplicate = interaction.options.getBoolean("override_duplicate");
 
         const mojang = await getMojang(username);
         if (mojang === "error" || !mojang) {
@@ -88,6 +93,31 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
                 return interaction.editReply({
                     embeds: [errorEmbed("The Cata level must be between 0 and 60.")]
                 });
+            }
+
+            let mcUser = await this.mongo.getUserByUuid(mojang.id) as MongoUser | undefined | null
+
+            if (mcUser) {
+                if (mcUser._id !== member.id) {
+                    const otherMember = await this.fetchMember(mcUser._id, member.guild)
+                    if (otherMember && !overrideDuplicate) {
+                        return interaction.editReply({
+                            embeds: [
+                                errorEmbed(
+                                    `The minecraft account \`${mojang.name}\` is linked to a different discord account on this server. Set override_duplicate to true to override this.`
+                                ),
+                            ],
+                        });
+                    } else {
+                        if (overrideDuplicate && otherMember!.manageable) {
+                            await otherMember!.edit({
+                                nick: null,
+                                roles: this.client.config.discord.roles.fixRoles
+                            }, `Duplicate discord account override by ${interaction.user.tag}`);
+                        }
+                        await this.mongo.deleteUserByUuid(mojang.id)
+                    }
+                }
             }
 
             let mongoUser = await this.mongo.getUserByDiscord(member.user.id) as MongoUser | undefined | null
@@ -123,7 +153,15 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
                 }
             }
 
-            let nickname = `❮${cataLevel}❯ ${mojang.name}`;
+            let emojis = "";
+
+            try {
+                emojis = member.displayName.split(" ")[2]
+            } catch (error: any) {
+
+            }
+
+            let nickname = `❮${cataLevel}❯ ${mojang.name} ${emojis}`;
             if (symbol) nickname = nickname.replace(/[❮❯]/g, symbol)
 
             await member.edit({
@@ -136,15 +174,6 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
                     embed("Force Verified!", `Successfully force verified <@${member.user.id}> as \`${mojang.name}\` and set their catacombs level to \`${cataLevel}\`.`)
                 ]
             });
-        }
-
-        let mongoUser = await this.mongo.getUserByDiscord(member.user.id) as MongoUser | undefined | null
-
-        if (!mongoUser) {
-            mongoUser = userSchema(member.user.id, mojang.id)
-            this.mongo.addUser(mongoUser)
-        } else {
-            this.mongo.updateUser(mongoUser)
         }
 
         let discord;
@@ -179,6 +208,40 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
                     ),
                 ],
             });
+        }
+
+        let mcUser = await this.mongo.getUserByUuid(mojang.id) as MongoUser | undefined | null
+
+        if (mcUser) {
+            if (mcUser._id !== member.id) {
+                const otherMember = await this.fetchMember(mcUser._id, member.guild)
+                if (otherMember && !overrideDuplicate) {
+                    return interaction.editReply({
+                        embeds: [
+                            errorEmbed(
+                                `The minecraft account \`${mojang.name}\` is linked to a different discord account on this server. Set override_duplicate to true to override this.`
+                            ),
+                        ],
+                    });
+                } else {
+                    if (overrideDuplicate && otherMember!.manageable) {
+                        await otherMember!.edit({
+                            nick: null,
+                            roles: this.client.config.discord.roles.fixRoles
+                        }, `Duplicate discord account override by ${interaction.user.tag}`)
+                    }
+                    await this.mongo.deleteUserByUuid(mojang.id)
+                }
+            }
+        }
+
+        let mongoUser = await this.mongo.getUserByDiscord(member.user.id) as MongoUser | undefined | null
+
+        if (!mongoUser) {
+            mongoUser = userSchema(member.user.id, mojang.id)
+            this.mongo.addUser(mongoUser)
+        } else {
+            this.mongo.updateUser(mongoUser)
         }
 
         let roles = member.roles as GuildMemberRoleManager
@@ -310,7 +373,15 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
             }
         }
 
-        let nickname = `❮${dungeons.cataLevel}❯ ${mojang.name}`;
+        let emojis = "";
+
+        try {
+            emojis = member.displayName.split(" ")[2]
+        } catch (error: any) {
+
+        }
+
+        let nickname = `❮${dungeons.cataLevel}❯ ${mojang.name} ${emojis}`;
         if (symbol) nickname = nickname.replace(/[❮❯]/g, symbol)
 
         if (!rolesArray.includes(this.client.config.discord.roles.member)) {

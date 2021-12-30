@@ -10,7 +10,7 @@ interface MojangResponse {
     name: string;
 }
 
-async function getMojang(username: string): Promise<MojangResponse | "error"> {
+async function getMojang(username: string, bypassMojangRateLimit?: boolean): Promise<MojangResponse | "error"> {
     if (mojangCache.has(username)) {
         return mojangCache.get(username)!;
     }

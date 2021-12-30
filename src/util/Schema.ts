@@ -18,7 +18,7 @@ function userSchema(id: Snowflake, uuid: string): MongoUser {
 
 function pollSchema(message: Message, mojang: MojangResponse): MongoPoll {
     let endDate = new Date();
-    endDate.setHours(endDate.getHours() + 6);
+    endDate.setHours(endDate.getHours() + 12);
     return {
         _id: message.id,
         channel: message.channel.id,

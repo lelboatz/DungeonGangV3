@@ -111,4 +111,14 @@ export default class MongoUtils {
         // @ts-ignore
         return this.mongo?.collection("polls").updateOne({ _id: id }, { $set: { votes: votes } })
     }
+
+    getUserByUuid(uuid: string): Promise<any> {
+        // @ts-ignore
+        return this.mongo?.collection("users").findOne({ uuid: uuid })
+    }
+
+    deleteUserByUuid(uuid: string) {
+        // @ts-ignore
+        return this.mongo?.collection("users").deleteOne({ uuid: uuid })
+    }
 }

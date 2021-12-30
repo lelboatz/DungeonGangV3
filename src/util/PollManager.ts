@@ -23,7 +23,7 @@ class PollManager {
             const polls = await this.client.mongo.getActivePolls()
             if (!polls) return;
             polls.forEach(async (poll) => {
-                if (poll.endDate < Date.now()) {
+                if (poll.endDate < (new Date().getTime() / 1000)) {
                     await this.endPoll(poll._id)
                 }
             })
@@ -84,7 +84,7 @@ class PollManager {
         }
 
         let endDate = new Date();
-        endDate.setHours(endDate.getHours() + 6);
+        endDate.setHours(endDate.getHours() + 12);
 
         let message;
 
@@ -344,6 +344,17 @@ class PollManager {
 
         switch (interaction.customId) {
             case "POSITIVE_VOTE": {
+                const member = interaction.member as GuildMember
+                if (member.roles.cache.has(this.client.config.discord.roles.misc.pollBlacklist)) {
+                    return interaction.editReply({
+                        content: "You are blacklisted from voting in polls."
+                    })
+                }
+                if (!member.roles.cache.has(this.client.config.discord.roles.topPlayer.plus)) {
+                    return interaction.editReply({
+                        content: "You must be a top player+ to vote in this poll."
+                    })
+                }
                 if (votes.negative.includes(interaction.user.id)) {
                     votes.negative.splice(votes.negative.indexOf(interaction.user.id), 1);
                     votes.positive.push(interaction.user.id);
@@ -370,6 +381,17 @@ class PollManager {
                 break;
             }
             case "NEUTRAL_VOTE": {
+                const member = interaction.member as GuildMember
+                if (member.roles.cache.has(this.client.config.discord.roles.misc.pollBlacklist)) {
+                    return interaction.editReply({
+                        content: "You are blacklisted from voting in polls."
+                    })
+                }
+                if (!member.roles.cache.has(this.client.config.discord.roles.topPlayer.plus)) {
+                    return interaction.editReply({
+                        content: "You must be a top player+ to vote in this poll."
+                    })
+                }
                 if (votes.negative.includes(interaction.user.id)) {
                     votes.negative.splice(votes.negative.indexOf(interaction.user.id), 1);
                     votes.neutral.push(interaction.user.id);
@@ -396,6 +418,17 @@ class PollManager {
                 break;
             }
             case "NEGATIVE_VOTE": {
+                const member = interaction.member as GuildMember
+                if (member.roles.cache.has(this.client.config.discord.roles.misc.pollBlacklist)) {
+                    return interaction.editReply({
+                        content: "You are blacklisted from voting in polls."
+                    })
+                }
+                if (!member.roles.cache.has(this.client.config.discord.roles.topPlayer.plus)) {
+                    return interaction.editReply({
+                        content: "You must be a top player+ to vote in this poll."
+                    })
+                }
                 if (votes.positive.includes(interaction.user.id)) {
                     votes.positive.splice(votes.positive.indexOf(interaction.user.id), 1);
                     votes.negative.push(interaction.user.id);

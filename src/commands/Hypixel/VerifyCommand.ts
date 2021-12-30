@@ -31,6 +31,14 @@ module.exports = class VerifyCommand extends BaseCommand {
             ephemeral: true
         })
 
+        if (!this.client.config.discord.verifyChannels.includes(interaction.channelId)) {
+            return interaction.editReply({
+                embeds: [
+                    errorEmbed("You can only use this command in a verification channel.")
+                ]
+            })
+        }
+
         const username = interaction.options.getString("username", true);
         const mojang = await getMojang(username);
         if (mojang === "error" || !mojang) {
@@ -75,6 +83,25 @@ module.exports = class VerifyCommand extends BaseCommand {
                     ),
                 ],
             });
+        }
+
+        let mcUser = await this.mongo.getUserByUuid(mojang.id) as MongoUser | undefined | null
+
+        if (mcUser) {
+            if (mcUser._id !== interaction.user.id) {
+                const otherMember = await this.fetchMember(mcUser._id, interaction.guild!)
+                if (otherMember) {
+                    return interaction.editReply({
+                        embeds: [
+                            errorEmbed(
+                                `The minecraft account \`${mojang.name}\` is linked to a different discord account on this server. Please leave the server on your other account (${otherMember.toString()}) in order to link your minecraft account.`,
+                            ),
+                        ],
+                    });
+                } else {
+                    await this.mongo.deleteUserByUuid(mojang.id)
+                }
+            }
         }
 
         let user = await this.mongo.getUserByDiscord(interaction.user.id) as MongoUser | undefined | null
@@ -158,7 +185,7 @@ module.exports = class VerifyCommand extends BaseCommand {
         }
 
         if (dungeons.masterSix) {
-            if (dungeons.masterSix <= 300000) {
+            if (dungeons.masterSix <= 180000) {
                 speedrunner = true;
             }
         }
@@ -216,7 +243,15 @@ module.exports = class VerifyCommand extends BaseCommand {
             }
         }
 
-        let nickname = `❮${dungeons.cataLevel}❯ ${mojang.name}`;
+        let emojis = "";
+
+        try {
+            emojis = member.displayName.split(" ")[2]
+        } catch (error: any) {
+
+        }
+
+        let nickname = `❮${dungeons.cataLevel}❯ ${mojang.name} ${emojis}`;
         if (symbol) nickname = nickname.replace(/[❮❯]/g, symbol)
 
         if (!rolesArray.includes(this.client.config.discord.roles.member)) {

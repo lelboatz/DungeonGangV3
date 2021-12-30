@@ -15,6 +15,7 @@ import klaw from "klaw";
 import Mongo from "./util/Mongo"
 import { Client as HypixelClient } from "@zikeji/hypixel"
 import axios from "axios";
+__dirname = path.resolve();
 
 export interface DungeonGang extends Client {
     commands: Collection<any, any>;
