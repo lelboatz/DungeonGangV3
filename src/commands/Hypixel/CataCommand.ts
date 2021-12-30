@@ -79,7 +79,7 @@ module.exports = class CataCommand extends BaseCommand {
                 secrets: player.achievements.skyblock_treasure_hunter ?? 0,
                 bloodMobs: (profile.members[mojang.id].stats.kills_watcher_summon_undead ?? 0) + (profile.members[mojang.id].stats.kills_watcher_summon_skeleton ?? 0) + (profile.members[mojang.id].stats.kills_master_watcher_summon_undead ?? 0),
                 floorSeven: profile.members[mojang.id].dungeons?.dungeon_types.catacombs.fastest_time_s_plus?.[7] ?? undefined,
-                masterFour: profile.members[mojang.id].dungeons?.dungeon_types.catacombs.fastest_time_s_plus?.[4] ?? undefined,
+                masterFour: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs.fastest_time_s_plus?.[4] ?? undefined,
                 masterFive: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs.fastest_time_s_plus?.[5] ?? undefined,
                 masterSix: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs.fastest_time_s_plus?.[6] ?? undefined,
                 floorSevenCompletions: profile.members[mojang.id].dungeons?.dungeon_types.catacombs.tier_completions?.[7] ?? 0,
@@ -150,6 +150,7 @@ module.exports = class CataCommand extends BaseCommand {
                         `<@&${this.client.config.discord.roles.topPlayer.votedOut}> ${NO}`, false
                     )
                     .setFooter(this.client.user?.username as string, this.client.user?.avatarURL()?.toString())
+                    .setColor("#05e318")
             ]
         })
     }

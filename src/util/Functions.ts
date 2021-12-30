@@ -165,10 +165,14 @@ function highestCataProfile(profiles: Components.Schemas.SkyBlockProfileCuteName
 }
 
 function fmtMSS(number: number) {
+    let ms: number | string = (number % 1000).toString();
+    if (ms.length === 2) {
+        ms = "0" + ms;
+    }
     let minutes = Math.floor(number / 60000);
     let seconds = ((number % 60000) / 1000).toFixed(0);
-    return minutes + ":" + (parseFloat(seconds) < 10 ? '0' : '') + seconds;
+    return minutes + ":" + (parseFloat(seconds) < 10 ? '0' : '') + seconds + "." + (ms);
 }
 
 
-export { getMojang, errorEmbed, ephemeralMessage, highestCataProfile, cataLevel, embed, fmtMSS, cataExp }
+export { getMojang, errorEmbed, ephemeralMessage, highestCataProfile, cataLevel, embed, fmtMSS, cataExp, MojangResponse }

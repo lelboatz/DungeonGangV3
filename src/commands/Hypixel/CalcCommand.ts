@@ -134,24 +134,24 @@ module.exports = class CalcCommand extends BaseCommand {
             }
         }
 
-        if (start > end) {
-            return interaction.editReply({
-                embeds: [
-                    errorEmbed("The start level cannot be higher than the end level.")
-                ]
-            })
-        }
+        // if (start > end) {
+        //     return interaction.editReply({
+        //         embeds: [
+        //             errorEmbed("The start level cannot be higher than the end level.")
+        //         ]
+        //     })
+        // }
 
         const startLevel = cataLevel(start), endLevel = cataLevel(end);
 
-        const requiredExp = end - start;
+        const requiredExp = Math.abs(end - start);
 
         return interaction.editReply({
-            embeds:[
+            embeds: [
                 {
                     title: `Catacombs XP Calculator`,
                     color: "#05e318",
-                    description: `**Level ${startLevel}** to Level **${endLevel.toFixed(2)}**`,
+                    description: `Level **${startLevel.toFixed(2)}** to Level **${endLevel.toFixed(2)}**`,
                     fields: [
                         {
                             name: "Required Experience",

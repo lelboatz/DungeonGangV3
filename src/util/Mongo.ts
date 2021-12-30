@@ -18,16 +18,27 @@ export interface MongoUser {
     }
 }
 
-export interface Poll {
-    id: Snowflake;
+export interface MongoPoll {
+    _id: Snowflake;
     channel: Snowflake;
     username: string;
     uuid: string;
+    endDate: number;
+    active: boolean;
     votes: {
         positive: Snowflake[]
         neutral: Snowflake[]
         negative: Snowflake[]
     }
+    stats: PollStats
+}
+
+interface PollStats {
+    cataLevel: number,
+    secrets: number,
+    bloodMobs: number,
+    masterSix: number | undefined,
+    masterSixCompletions: number
 }
 
 export default class MongoUtils {
@@ -63,7 +74,7 @@ export default class MongoUtils {
         return this.mongo?.collection("users").replaceOne({ _id: user._id }, user)
     }
 
-    getUserByDiscord(id: Snowflake) {
+    getUserByDiscord(id: Snowflake): Promise<any> {
         // @ts-ignore
         return this.mongo?.collection("users").findOne({ _id: id })
     }
@@ -71,5 +82,33 @@ export default class MongoUtils {
     deleteUserByDiscord(id: Snowflake) {
         // @ts-ignore
         return this.mongo?.collection("users").deleteOne({ _id: id })
+    }
+
+    addPoll(poll: MongoPoll) {
+        // @ts-ignore
+        return this.mongo?.collection("polls").insertOne(poll)
+    }
+
+    getPoll(id: Snowflake): Promise<any> {
+        // @ts-ignore
+        return this.mongo?.collection("polls").findOne({ _id: id })
+    }
+
+    getPolls(uuid: string) {
+        return this.mongo?.collection("polls").find({ uuid: uuid }).toArray()
+    }
+
+    getActivePolls(): Promise<MongoPoll[] | undefined> | undefined {
+        return this.mongo?.collection("polls").find({ active: true }).toArray() as Promise<MongoPoll[] | undefined> | undefined
+    }
+
+    endPoll(id: Snowflake) {
+        // @ts-ignore
+        return this.mongo?.collection("polls").updateOne({ _id: id }, { $set: { active: false, endDate: (new Date().getTime() / 1000) } })
+    }
+
+    updateVotes(id: Snowflake, votes: { positive: Snowflake[], neutral: Snowflake[], negative: Snowflake[] }) {
+        // @ts-ignore
+        return this.mongo?.collection("polls").updateOne({ _id: id }, { $set: { votes: votes } })
     }
 }
