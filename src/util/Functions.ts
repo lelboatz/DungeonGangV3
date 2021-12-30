@@ -146,6 +146,27 @@ function cataExp(level: number) {
 
 function highestCataProfile(profiles: Components.Schemas.SkyBlockProfileCuteName[] & {meta: Omit<Paths.SkyblockProfiles.Get.Responses.$200, "profiles"> & DefaultMeta}, uuid: string) {
     try {
+        if (profiles === null) {
+            return void 0;
+        }
+        let latestProfile;
+        for (let i = 0; i < profiles.length; i++) {
+            if (!latestProfile) {
+                latestProfile = profiles[i];
+            } else if (profiles[i]?.members[uuid].last_save && latestProfile.members[uuid].last_save) {
+                if (profiles[i]?.members[uuid].last_save! > latestProfile.members[uuid].last_save) {
+                    latestProfile = profiles[i];
+                }
+            }
+        }
+        return latestProfile;
+    } catch {
+        return void 0;
+    }
+}
+
+function highestCataProfileOld(profiles: Components.Schemas.SkyBlockProfileCuteName[] & {meta: Omit<Paths.SkyblockProfiles.Get.Responses.$200, "profiles"> & DefaultMeta}, uuid: string) {
+    try {
         let highestCataXp = -1;
         let highestProfile;
         if (profiles === null) return void 0;
