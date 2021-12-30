@@ -3,6 +3,7 @@ import { DungeonGang } from "../../index";
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { CommandInteraction, Guild } from "discord.js";
 import { embed, ephemeralMessage, errorEmbed } from "../../util/Functions";
+import { MongoUser } from "../../util/Mongo";
 
 module.exports = class UnverifyCommand extends BaseCommand {
     constructor(client: DungeonGang) {
@@ -48,9 +49,12 @@ module.exports = class UnverifyCommand extends BaseCommand {
             });
         }
 
-        if (await this.mongo.getUserByDiscord(member.user.id)) {
-            await this.mongo.deleteUserByDiscord(member.user.id);
-        }
+        let users = await this.mongo.getUsersByDiscord(member.id) as MongoUser[] | undefined;
+
+        users?.forEach(async (user) => {
+            user.discordId = undefined;
+            await this.mongo.updateUser(user);
+        });
 
         await member.edit({
             roles: this.client.config.discord.roles.fixRoles,

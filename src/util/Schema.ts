@@ -4,10 +4,11 @@ import { MojangResponse } from "./Functions";
 
 function userSchema(id: Snowflake, uuid: string): MongoUser {
     return {
-        _id: id,
         uuid,
+        discordId: id,
+        votedIn: false,
+        votedOut: false,
         emotes: {
-            unlocked: [],
             given: [],
             slots: {
                 default: "none"

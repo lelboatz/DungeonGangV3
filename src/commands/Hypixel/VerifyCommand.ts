@@ -85,32 +85,24 @@ module.exports = class VerifyCommand extends BaseCommand {
             });
         }
 
-        let mcUser = await this.mongo.getUserByUuid(mojang.id) as MongoUser | undefined | null
+        let user = await this.mongo.getUser(mojang.id) as MongoUser | null | undefined;
 
-        if (mcUser) {
-            if (mcUser._id !== interaction.user.id) {
-                const otherMember = await this.fetchMember(mcUser._id, interaction.guild!)
+        if (!user) {
+            await this.mongo.addUser(userSchema(interaction.user.id, mojang.id));
+            user = await this.mongo.getUser(mojang.id) as MongoUser | undefined;
+        } else {
+            if (user.discordId && user.discordId !== interaction.user.id) {
+                const otherMember = await this.fetchMember(user.discordId, interaction.guild!);
                 if (otherMember) {
                     return interaction.editReply({
                         embeds: [
-                            errorEmbed(
-                                `The minecraft account \`${mojang.name}\` is linked to a different discord account on this server. Please leave the server on your other account (${otherMember.toString()}) in order to link your minecraft account.`,
-                            ),
-                        ],
-                    });
+                            errorEmbed(`The minecraft account \`${mojang.name}\` is linked to a different discord account on this server. Please leave the server on your other account (${otherMember.toString()}) and try again.`)
+                        ]
+                    })
                 } else {
-                    await this.mongo.deleteUserByUuid(mojang.id)
+                    user.discordId = interaction.user.id;
                 }
             }
-        }
-
-        let user = await this.mongo.getUserByDiscord(interaction.user.id) as MongoUser | undefined | null
-
-        if (!user) {
-            user = userSchema(interaction.user.id, mojang.id)
-            this.mongo.addUser(user)
-        } else {
-            this.mongo.updateUser(user)
         }
 
         let roles = interaction.member?.roles as GuildMemberRoleManager
@@ -155,6 +147,23 @@ module.exports = class VerifyCommand extends BaseCommand {
         }
 
         let member = interaction.member as GuildMember;
+
+        if (member.roles.cache.has(this.client.config.discord.roles.topPlayer.votedOut)) {
+            if (user) {
+                user.votedOut = true;
+            }
+        }
+
+        if (member.roles.cache.has(this.client.config.discord.roles.topPlayer.plusReq)) {
+            if (user) {
+                user.votedIn = true;
+            }
+        }
+
+        if (user) {
+            await this.mongo.updateUser(user)
+        }
+
         let tpp = false, tp = false, tpm = false, speedrunner = false;
 
         if ((dungeons.secrets >= 50000 || dungeons.bloodMobs >= 45000) && dungeons.cataLevel >= 48 && dungeons.masterSix) {
@@ -187,6 +196,8 @@ module.exports = class VerifyCommand extends BaseCommand {
                 tpm = true;
             }
         }
+
+        if (tpp) tp = true;
 
         if (dungeons.masterSix) {
             if (dungeons.masterSix <= 180000) {

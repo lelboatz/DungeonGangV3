@@ -149,33 +149,25 @@ module.exports = class ScanCommand extends BaseCommand {
                 continue;
             }
 
-            let mcUser = await this.mongo.getUserByUuid(mojang.id) as MongoUser | undefined | null
+            let mongoUser = await this.mongo.getUser(mojang.id) as MongoUser | null | undefined;
 
-            if (mcUser) {
-                if (mcUser._id !== member.id) {
-                    const otherMember = await this.fetchMember(mcUser._id, member.guild)
+            if (!mongoUser) {
+                await this.mongo.addUser(userSchema(member.id, mojang.id));
+                mongoUser = await this.mongo.getUser(mojang.id) as MongoUser | undefined;
+            } else {
+                if (mongoUser.discordId && mongoUser.discordId !== member.id) {
+                    const otherMember = await this.fetchMember(mongoUser.discordId, member.guild);
                     if (otherMember) {
                         channel?.send({
                             embeds: [
-                                errorEmbed(
-                                    `The minecraft account \`${mojang.name}\` is linked to a different discord account on this server. Skipping this member.`,
-                                ),
-                            ],
-                        });
+                                errorEmbed(`The minecraft account \`${mojang.name}\` is linked to a different discord account on this server (${otherMember.toString()}). Skipping this member.`)
+                            ]
+                        })
                         continue;
                     } else {
-                        await this.mongo.deleteUserByUuid(mojang.id)
+                        mongoUser.discordId = member.id;
                     }
                 }
-            }
-
-            let mongoUser = await this.mongo.getUserByDiscord(member.user.id) as MongoUser | undefined | null
-
-            if (!mongoUser) {
-                mongoUser = userSchema(member.user.id, mojang.id)
-                this.mongo.addUser(mongoUser)
-            } else {
-                this.mongo.updateUser(mongoUser)
             }
 
             let roles = member.roles as GuildMemberRoleManager
@@ -220,6 +212,20 @@ module.exports = class ScanCommand extends BaseCommand {
                 }
             }
 
+            if (member.roles.cache.has(this.client.config.discord.roles.topPlayer.votedOut)) {
+                if (mongoUser) {
+                    mongoUser.votedOut = true;
+                }
+            }
+
+            if (member.roles.cache.has(this.client.config.discord.roles.topPlayer.plusReq)) {
+                if (mongoUser) {
+                    mongoUser.votedIn = true;
+                }
+            }
+
+            if (mongoUser) await this.mongo.updateUser(mongoUser);
+
             let tpp = false, tp = false, tpm = false, speedrunner = false;
 
             if ((dungeons.secrets >= 50000 || dungeons.bloodMobs >= 45000) && dungeons.cataLevel >= 48 && dungeons.masterSix) {
@@ -258,6 +264,8 @@ module.exports = class ScanCommand extends BaseCommand {
                     speedrunner = true;
                 }
             }
+
+            if (tpp) tp = true;
 
             for (const [, value] of Object.entries(this.client.config.discord.roles.cata)) {
                 if (rolesArray.includes(value)) {

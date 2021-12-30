@@ -95,39 +95,49 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
                 });
             }
 
-            let mcUser = await this.mongo.getUserByUuid(mojang.id) as MongoUser | undefined | null
+            let mongoUser = await this.mongo.getUser(mojang.id) as MongoUser | null | undefined;
 
-            if (mcUser) {
-                if (mcUser._id !== member.id) {
-                    const otherMember = await this.fetchMember(mcUser._id, member.guild)
-                    if (otherMember && !overrideDuplicate) {
-                        return interaction.editReply({
-                            embeds: [
-                                errorEmbed(
-                                    `The minecraft account \`${mojang.name}\` is linked to a different discord account on this server. Set override_duplicate to true to override this.`
-                                ),
-                            ],
-                        });
-                    } else {
-                        if (overrideDuplicate && otherMember!.manageable) {
-                            await otherMember!.edit({
-                                nick: null,
-                                roles: this.client.config.discord.roles.fixRoles
-                            }, `Duplicate discord account override by ${interaction.user.tag}`);
+            if (!mongoUser) {
+                await this.mongo.addUser(userSchema(member.id, mojang.id));
+                mongoUser = await this.mongo.getUser(mojang.id) as MongoUser | undefined;
+            } else {
+                if (mongoUser.discordId && mongoUser.discordId !== member.id) {
+                    const otherMember = await this.fetchMember(mongoUser.discordId, member.guild);
+                    if (otherMember) {
+                        if (!overrideDuplicate) {
+                            return interaction.editReply({
+                                embeds: [
+                                    errorEmbed(`The minecraft account \`${mojang.name}\` is linked to a different discord account on this server (${otherMember.toString()}). Set override_duplicate to true to override.`)
+                                ]
+                            })
+                        } else {
+                            mongoUser.discordId = member.id;
+                            if (otherMember.manageable) {
+                                await otherMember.edit({
+                                    nick: null,
+                                    roles: this.client.config.discord.roles.fixRoles
+                                })
+                            }
                         }
-                        await this.mongo.deleteUserByUuid(mojang.id)
+                    } else {
+                        mongoUser.discordId = member.id;
                     }
                 }
             }
 
-            let mongoUser = await this.mongo.getUserByDiscord(member.user.id) as MongoUser | undefined | null
-
-            if (!mongoUser) {
-                mongoUser = userSchema(member.user.id, mojang.id)
-                this.mongo.addUser(mongoUser)
-            } else {
-                this.mongo.updateUser(mongoUser)
+            if (member.roles.cache.has(this.client.config.discord.roles.topPlayer.votedOut)) {
+                if (mongoUser) {
+                    mongoUser.votedOut = true;
+                }
             }
+
+            if (member.roles.cache.has(this.client.config.discord.roles.topPlayer.plusReq)) {
+                if (mongoUser) {
+                    mongoUser.votedIn = true;
+                }
+            }
+
+            if (mongoUser) await this.mongo.updateUser(mongoUser);
 
             const roles = this.arrayRoleIds(member.roles);
 
@@ -210,38 +220,34 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
             });
         }
 
-        let mcUser = await this.mongo.getUserByUuid(mojang.id) as MongoUser | undefined | null
-
-        if (mcUser) {
-            if (mcUser._id !== member.id) {
-                const otherMember = await this.fetchMember(mcUser._id, member.guild)
-                if (otherMember && !overrideDuplicate) {
-                    return interaction.editReply({
-                        embeds: [
-                            errorEmbed(
-                                `The minecraft account \`${mojang.name}\` is linked to a different discord account on this server. Set override_duplicate to true to override this.`
-                            ),
-                        ],
-                    });
-                } else {
-                    if (overrideDuplicate && otherMember!.manageable) {
-                        await otherMember!.edit({
-                            nick: null,
-                            roles: this.client.config.discord.roles.fixRoles
-                        }, `Duplicate discord account override by ${interaction.user.tag}`)
-                    }
-                    await this.mongo.deleteUserByUuid(mojang.id)
-                }
-            }
-        }
-
-        let mongoUser = await this.mongo.getUserByDiscord(member.user.id) as MongoUser | undefined | null
+        let mongoUser = await this.mongo.getUser(mojang.id) as MongoUser | null | undefined;
 
         if (!mongoUser) {
-            mongoUser = userSchema(member.user.id, mojang.id)
-            this.mongo.addUser(mongoUser)
+            await this.mongo.addUser(userSchema(member.id, mojang.id));
+            mongoUser = await this.mongo.getUser(mojang.id) as MongoUser | undefined;
         } else {
-            this.mongo.updateUser(mongoUser)
+            if (mongoUser.discordId && mongoUser.discordId !== member.id) {
+                const otherMember = await this.fetchMember(mongoUser.discordId, member.guild);
+                if (otherMember) {
+                    if (!overrideDuplicate) {
+                        return interaction.editReply({
+                            embeds: [
+                                errorEmbed(`The minecraft account \`${mojang.name}\` is linked to a different discord account on this server (${otherMember.toString()}). Set override_duplicate to true to override.`)
+                            ]
+                        })
+                    } else {
+                        mongoUser.discordId = member.id;
+                        if (otherMember.manageable) {
+                            await otherMember.edit({
+                                nick: null,
+                                roles: this.client.config.discord.roles.fixRoles
+                            })
+                        }
+                    }
+                } else {
+                    mongoUser.discordId = member.id;
+                }
+            }
         }
 
         let roles = member.roles as GuildMemberRoleManager
@@ -285,6 +291,19 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
             }
         }
 
+        if (member.roles.cache.has(this.client.config.discord.roles.topPlayer.votedOut)) {
+            if (mongoUser) {
+                mongoUser.votedOut = true;
+            }
+        }
+
+        if (member.roles.cache.has(this.client.config.discord.roles.topPlayer.plusReq)) {
+            if (mongoUser) {
+                mongoUser.votedIn = true;
+                await this.mongo.updateUser(mongoUser);
+            }
+        }
+
         let tpp = false, tp = false, tpm = false, speedrunner = false;
 
         if ((dungeons.secrets >= 50000 || dungeons.bloodMobs >= 45000) && dungeons.cataLevel >= 48 && dungeons.masterSix) {
@@ -317,6 +336,8 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
                 tpm = true;
             }
         }
+
+        if (tpp) tp = true;
 
         if (dungeons.masterSix) {
             if (dungeons.masterSix <= 180000) {

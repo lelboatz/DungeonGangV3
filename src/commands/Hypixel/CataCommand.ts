@@ -81,7 +81,7 @@ module.exports = class CataCommand extends BaseCommand {
                 secrets: player.achievements.skyblock_treasure_hunter ?? 0,
                 bloodMobs: (profile.members[mojang.id].stats.kills_watcher_summon_undead ?? 0) + (profile.members[mojang.id].stats.kills_watcher_summon_skeleton ?? 0) + (profile.members[mojang.id].stats.kills_master_watcher_summon_undead ?? 0),
                 floorSeven: profile.members[mojang.id].dungeons?.dungeon_types.catacombs.fastest_time_s_plus?.[7] ?? undefined,
-                masterFour: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs.fastest_time_s_plus?.[4] ?? undefined,
+                masterFour: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs.fastest_time_s?.[4] ?? undefined,
                 masterFive: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs.fastest_time_s_plus?.[5] ?? undefined,
                 masterSix: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs.fastest_time_s_plus?.[6] ?? undefined,
                 floorSevenCompletions: profile.members[mojang.id].dungeons?.dungeon_types.catacombs.tier_completions?.[7] ?? 0,
@@ -93,7 +93,7 @@ module.exports = class CataCommand extends BaseCommand {
         let YES = "<:yes:811402191947694111>", NO = "<:no:819295465623388201>"
 
 
-        let tpm = NO, tp = NO, tpp = NO, speedrunner = NO, votedOut = NO;
+        let tpm = NO, tp = NO, tpp = NO, speedrunner = NO, votedOut = NO, plusReq = NO;
 
         if ((dungeons.secrets >= 50000 || dungeons.bloodMobs >= 45000) && dungeons.cataLevel >= 48 && dungeons.masterSix) {
             if (dungeons.masterSix <= 195000) {
@@ -128,6 +128,8 @@ module.exports = class CataCommand extends BaseCommand {
             }
         }
 
+        if (tpp === YES) tp = YES;
+
         return interaction.editReply({
             embeds: [
                 new MessageEmbed()
@@ -141,7 +143,7 @@ module.exports = class CataCommand extends BaseCommand {
                     .addField("**Secrets**", this.formatter.format(dungeons.secrets), true)
                     .addField("**Blood Mob Kills**", this.formatter.format(dungeons.bloodMobs), true)
                     .addField("**Floor 7**", "S+ PB: " + (dungeons.floorSeven ? fmtMSS(dungeons.floorSeven) : "N/A") + "\nCompletions: " + this.formatter.format(dungeons.floorSevenCompletions), true)
-                    .addField("**Master 4**", "S+ PB: " + (dungeons.masterFour ? fmtMSS(dungeons.masterFour) : "N/A") + "\nCompletions: " + this.formatter.format(dungeons.masterFourCompletions), true)
+                    .addField("**Master 4**", "S PB: " + (dungeons.masterFour ? fmtMSS(dungeons.masterFour) : "N/A") + "\nCompletions: " + this.formatter.format(dungeons.masterFourCompletions), true)
                     .addField("**Master 5**", "S+ PB: " + (dungeons.masterFive ? fmtMSS(dungeons.masterFive) : "N/A") + "\nCompletions: " + this.formatter.format(dungeons.masterFiveCompletions), true)
                     .addField("**Master 6**", "S+ PB: " + (dungeons.masterSix ? fmtMSS(dungeons.masterSix) : "N/A") + "\nCompletions: " + this.formatter.format(dungeons.masterSixCompletions), true)
                     .addField("**Qualifications**",
@@ -149,6 +151,7 @@ module.exports = class CataCommand extends BaseCommand {
                         `<@&${this.client.config.discord.roles.topPlayer.normal}> ${tp}\n` +
                         `<@&${this.client.config.discord.roles.topPlayer.plus}> ${tpp}\n` +
                         `<@&${this.client.config.discord.roles.misc.speedRunner}> ${speedrunner}\n` +
+                        `<@&${this.client.config.discord.roles.topPlayer.plusReq}> ${NO}\n` +
                         `<@&${this.client.config.discord.roles.topPlayer.votedOut}> ${NO}`, false
                     )
                     .setFooter(this.client.user?.username as string, this.client.user?.avatarURL()?.toString())
