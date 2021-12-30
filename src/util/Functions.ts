@@ -16,7 +16,9 @@ async function getMojang(username: string, bypassMojangRateLimit?: boolean): Pro
     }
     try {
         const mojang = await axios.get(`https://api.mojang.com/users/profiles/minecraft/${username}`);
-        mojangCache.set(username, mojang.data);
+        if (mojang.data) {
+            mojangCache.set(username, mojang.data);
+        }
         return mojang.data;
     } catch (error) {
         return "error";

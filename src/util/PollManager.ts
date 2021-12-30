@@ -455,7 +455,7 @@ class PollManager {
                 break;
             }
             case "END_POLL": {
-                if (this.client.getPermissionLevel(interaction.member as GuildMember | null) < 0) {
+                if (this.client.getPermissionLevel(interaction.member as GuildMember | null) < 1) {
                     return interaction.editReply({
                         content: "You don't have permission to end the poll"
                     })
