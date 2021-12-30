@@ -316,6 +316,10 @@ module.exports = class ScanCommand extends BaseCommand {
 
             }
 
+            if (!emojis) {
+                emojis = ""
+            }
+
             let nickname = `❮${dungeons.cataLevel}❯ ${mojang.name} ${emojis}`;
             if (symbol) nickname = nickname.replace(/[❮❯]/g, symbol)
 

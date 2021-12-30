@@ -380,6 +380,9 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
         } catch (error: any) {
 
         }
+        if (!emojis) {
+            emojis = ""
+        }
 
         let nickname = `❮${dungeons.cataLevel}❯ ${mojang.name} ${emojis}`;
         if (symbol) nickname = nickname.replace(/[❮❯]/g, symbol)
