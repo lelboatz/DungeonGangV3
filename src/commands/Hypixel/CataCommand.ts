@@ -90,7 +90,7 @@ module.exports = class CataCommand extends BaseCommand {
                 masterSixCompletions: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs.tier_completions?.[6] ?? 0
             }
         }
-        let YES = "<:yes:811402191947694111>", NO = "<:no:819295465623388201>"
+        let YES = "<:yes:838801988241588304>", NO = "<:no:838802013541498890>"
 
 
         let tpm = NO, tp = NO, tpp = NO, speedrunner = NO, votedOut = NO, plusReq = NO;
