@@ -99,7 +99,7 @@ module.exports = class CataCommand extends BaseCommand {
             }
         }
 
-        if (!tpp && dungeons.cataLevel >= 45 && dungeons.secrets > 30000 && (dungeons.floorSeven || dungeons.masterFive || dungeons.masterSix)) {
+        if ((tpp === NO) && dungeons.cataLevel >= 45 && dungeons.secrets > 30000 && (dungeons.floorSeven || dungeons.masterFive || dungeons.masterSix)) {
             if (dungeons.floorSeven && dungeons.floorSeven <= 225000) {
                 tp = YES;
             }
@@ -111,7 +111,7 @@ module.exports = class CataCommand extends BaseCommand {
             }
         }
 
-        if ((!tp && !tpp) && dungeons.cataLevel >= 42 && dungeons.secrets > 20000 && (dungeons.floorSeven || dungeons.masterFive)) {
+        if ((tp === NO && tpp === NO) && dungeons.cataLevel >= 42 && dungeons.secrets > 20000 && (dungeons.floorSeven || dungeons.masterFive)) {
             if (dungeons.floorSeven && dungeons.floorSeven <= 260000) {
                 tpm = YES;
             }

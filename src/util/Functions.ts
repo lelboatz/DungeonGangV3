@@ -170,8 +170,8 @@ function fmtMSS(number: number) {
         ms = "0" + ms;
     }
     let minutes = Math.floor(number / 60000);
-    let seconds = ((number % 60000) / 1000).toFixed(0);
-    return minutes + ":" + (parseFloat(seconds) < 10 ? '0' : '') + seconds + "." + (ms);
+    let seconds = Math.floor(((number % 60000) / 1000))
+    return minutes + ":" + (seconds < 10 ? '0' : '') + seconds + "." + (ms);
 }
 
 
