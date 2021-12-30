@@ -81,13 +81,13 @@ module.exports = class CataCommand extends BaseCommand {
                 secrets: player.achievements.skyblock_treasure_hunter ?? 0,
                 bloodMobs: (profile.members[mojang.id].stats.kills_watcher_summon_undead ?? 0) + (profile.members[mojang.id].stats.kills_watcher_summon_skeleton ?? 0) + (profile.members[mojang.id].stats.kills_master_watcher_summon_undead ?? 0),
                 floorSeven: profile.members[mojang.id].dungeons?.dungeon_types.catacombs.fastest_time_s_plus?.[7] ?? undefined,
-                masterFour: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs.fastest_time_s?.[4] ?? undefined,
-                masterFive: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs.fastest_time_s_plus?.[5] ?? undefined,
-                masterSix: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs.fastest_time_s_plus?.[6] ?? undefined,
+                masterFour: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs?.fastest_time_s?.[4] ?? undefined,
+                masterFive: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs?.fastest_time_s_plus?.[5] ?? undefined,
+                masterSix: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs?.fastest_time_s_plus?.[6] ?? undefined,
                 floorSevenCompletions: profile.members[mojang.id].dungeons?.dungeon_types.catacombs.tier_completions?.[7] ?? 0,
-                masterFourCompletions: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs.tier_completions?.[4] ?? 0,
-                masterFiveCompletions: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs.tier_completions?.[5] ?? 0,
-                masterSixCompletions: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs.tier_completions?.[6] ?? 0
+                masterFourCompletions: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs?.tier_completions?.[4] ?? 0,
+                masterFiveCompletions: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs?.tier_completions?.[5] ?? 0,
+                masterSixCompletions: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs?.tier_completions?.[6] ?? 0
             }
         }
         let YES = "<:yes:838801988241588304>", NO = "<:no:838802013541498890>"
