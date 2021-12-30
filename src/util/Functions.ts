@@ -133,6 +133,9 @@ function cataLevel(xp: number) {
         }
 
     }
+    if (level === 0) {
+        return 0
+    }
     return level + percentage - 1;
 }
 
