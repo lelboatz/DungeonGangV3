@@ -96,29 +96,29 @@ export default class MongoUtils {
 
     addPoll(poll: MongoPoll) {
         // @ts-ignore
-        return this.mongo?.collection("testPolls").insertOne(poll)
+        return this.mongo?.collection("polls").insertOne(poll)
     }
 
     getPoll(id: Snowflake): Promise<any> {
         // @ts-ignore
-        return this.mongo?.collection("testPolls").findOne({ _id: id })
+        return this.mongo?.collection("polls").findOne({ _id: id })
     }
 
     getPolls(uuid: string) {
-        return this.mongo?.collection("testPolls").find({ uuid: uuid }).toArray()
+        return this.mongo?.collection("polls").find({ uuid: uuid }).toArray()
     }
 
     getActivePolls(): Promise<MongoPoll[] | undefined> | undefined {
-        return this.mongo?.collection("testPolls").find({ active: true }).toArray() as Promise<MongoPoll[] | undefined> | undefined
+        return this.mongo?.collection("polls").find({ active: true }).toArray() as Promise<MongoPoll[] | undefined> | undefined
     }
 
     endPoll(id: Snowflake) {
         // @ts-ignore
-        return this.mongo?.collection("testPolls").updateOne({ _id: id }, { $set: { active: false, endDate: (new Date().getTime() / 1000) } })
+        return this.mongo?.collection("polls").updateOne({ _id: id }, { $set: { active: false, endDate: (new Date().getTime() / 1000) } })
     }
 
     updateVotes(id: Snowflake, votes: { positive: Snowflake[], neutral: Snowflake[], negative: Snowflake[] }) {
         // @ts-ignore
-        return this.mongo?.collection("testPolls").updateOne({ _id: id }, { $set: { votes: votes } })
+        return this.mongo?.collection("polls").updateOne({ _id: id }, { $set: { votes: votes } })
     }
 }
