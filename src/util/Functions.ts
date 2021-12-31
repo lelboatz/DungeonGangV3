@@ -159,7 +159,6 @@ function highestCataProfile(profiles: Components.Schemas.SkyBlockProfileCuteName
             return void 0;
         }
         let latestProfile;
-        console.log(profiles.length)
         for (let i = 0; i < profiles.length; i++) {
             if (!profiles[i]?.members[uuid].last_save) continue;
             if (!latestProfile) {

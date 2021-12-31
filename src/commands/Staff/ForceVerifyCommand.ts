@@ -298,8 +298,11 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
         if (member.roles.cache.has(this.client.config.discord.roles.topPlayer.plusReq)) {
             if (mongoUser) {
                 mongoUser.votedIn = true;
-                await this.mongo.updateUser(mongoUser);
             }
+        }
+
+        if (mongoUser) {
+            await this.mongo.updateUser(mongoUser);
         }
 
         let tpp = false, tp = false, tpm = false, speedrunner = false, secretDuper = false;
