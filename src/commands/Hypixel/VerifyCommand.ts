@@ -253,7 +253,7 @@ module.exports = class VerifyCommand extends BaseCommand {
         } else if (dungeons.cataLevel >= 35 && dungeons.cataLevel <= 39) {
             rolesArray.push(this.client.config.discord.roles.cata["35"])
         } else {
-            if (!tpp && !tp && !tpm) {
+            if (!tpp && !tp) {
                 rolesArray.push(this.client.config.discord.roles.cata["35"])
             } else {
                 // @ts-ignore
