@@ -139,6 +139,10 @@ function cataLevel(xp: number) {
     return level + percentage - 1;
 }
 
+function validUnicode(str: string) {
+    return /[^\u0000-\u007f]/.test(str);
+}
+
 function cataExp(level: number) {
     if (Number.isInteger(level)) {
         return cataXp[level][1]
@@ -204,4 +208,4 @@ function fmtMSS(number: number) {
 }
 
 
-export { getMojang, errorEmbed, ephemeralMessage, highestCataProfile, cataLevel, embed, fmtMSS, cataExp, MojangResponse }
+export { getMojang, errorEmbed, ephemeralMessage, highestCataProfile, cataLevel, embed, fmtMSS, cataExp, validUnicode, MojangResponse }

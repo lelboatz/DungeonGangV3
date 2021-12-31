@@ -128,7 +128,7 @@ module.exports = class CataCommand extends BaseCommand {
         }
 
         if (dungeons.masterSix) {
-            if (dungeons.masterSix <= 180000) {
+            if (dungeons.masterSix <= 170000) {
                 speedrunner = YES;
             }
         }

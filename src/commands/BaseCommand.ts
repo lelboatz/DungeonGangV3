@@ -50,4 +50,5 @@ export default abstract class BaseCommand {
     removeDuplicates(array: any[]) {
         return [...new Set(array)]
     }
+
 }

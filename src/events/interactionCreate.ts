@@ -1,6 +1,7 @@
 import { Interaction, GuildMember } from "discord.js";
 import { DungeonGang } from "../index"
 import PollManager from "../util/PollManager";
+import EmojiManager from "../util/EmojiManager";
 
 
 module.exports = class {
@@ -30,6 +31,11 @@ module.exports = class {
         if (interaction.isButton()) {
             if (["POSITIVE_VOTE", "NEUTRAL_VOTE", "NEGATIVE_VOTE", "END_POLL"].includes(interaction.customId)) {
                 return PollManager.onInteraction(interaction);
+            }
+        }
+        if (interaction.isAutocomplete()) {
+            if (interaction.commandName === "equip") {
+                return EmojiManager.autocomplete(interaction);
             }
         }
     }

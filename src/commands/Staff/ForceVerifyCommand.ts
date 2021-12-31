@@ -13,6 +13,7 @@ import {
 } from "../../util/Functions";
 import { MongoUser } from "../../util/Mongo";
 import { userSchema } from "../../util/Schema";
+import EmojiManager from "../../util/EmojiManager";
 
 module.exports = class ForceVerifyCommand extends BaseCommand {
     constructor(client: DungeonGang) {
@@ -163,13 +164,10 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
                 }
             }
 
-            let emojis = "";
-
-            try {
-                emojis = member.displayName.split(" ")[2]
-            } catch (error: any) {
-
-            }
+            const manager = new EmojiManager(member)
+            await manager.update()
+            await manager.sync()
+            const emojis = manager.toString()
 
             let nickname = `❮${cataLevel}❯ ${mojang.name} ${emojis}`;
             if (symbol) nickname = nickname.replace(/[❮❯]/g, symbol)
@@ -304,7 +302,7 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
             }
         }
 
-        let tpp = false, tp = false, tpm = false, speedrunner = false;
+        let tpp = false, tp = false, tpm = false, speedrunner = false, secretDuper = false;
 
         if ((dungeons.secrets >= 50000 || dungeons.bloodMobs >= 45000) && dungeons.cataLevel >= 48 && dungeons.masterSix) {
             if (dungeons.masterSix <= 195000 && !member.roles.cache.has(this.client.config.discord.roles.topPlayer.votedOut)) {
@@ -340,9 +338,13 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
         if (tpp) tp = true;
 
         if (dungeons.masterSix) {
-            if (dungeons.masterSix <= 180000) {
+            if (dungeons.masterSix <= 170000) {
                 speedrunner = true;
             }
+        }
+
+        if (dungeons.secrets >= 100000) {
+            secretDuper = true;
         }
 
         for (const [, value] of Object.entries(this.client.config.discord.roles.cata)) {
@@ -375,6 +377,10 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
             rolesArray.push(this.client.config.discord.roles.misc.speedRunner)
         }
 
+        if (secretDuper && !rolesArray.includes(this.client.config.discord.roles.misc.secretDuper)) {
+            rolesArray.push(this.client.config.discord.roles.misc.secretDuper)
+        }
+
         if (dungeons.cataLevel < 30 || dungeons.cataLevel > 60) {
 
         } else if (dungeons.cataLevel >= 30 && dungeons.cataLevel <= 34) {
@@ -398,16 +404,10 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
             }
         }
 
-        let emojis = "";
-
-        try {
-            emojis = member.displayName.split(" ")[2]
-        } catch (error: any) {
-
-        }
-        if (!emojis) {
-            emojis = ""
-        }
+        const manager = new EmojiManager(member)
+        await manager.update()
+        await manager.sync()
+        const emojis = manager.toString()
 
         let nickname = `❮${dungeons.cataLevel}❯ ${mojang.name} ${emojis}`;
         if (symbol) nickname = nickname.replace(/[❮❯]/g, symbol)
