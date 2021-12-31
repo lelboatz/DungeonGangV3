@@ -60,24 +60,24 @@ export default class EmojiManager {
                 this.slots[slot] = emote;
             }
         }
-        // if (this.member.manageable) {
-        //     const name = this.member.nickname?.split(" ")[0]
-        //     if (!name) return;
-        //     const newName = name[0] + " " + name[1] + " " + this.toString()
-        //     return this.member.setNickname(newName, "Equipped emote")
-        // }
+        if (this.member.manageable) {
+            const name = this.member.nickname?.split(" ")
+            if (!name) return;
+            const newName = name[0] + " " + name[1] + " " + this.toString()
+            return this.member.setNickname(newName, "Equipped emote")
+        }
     }
 
     unequip(slot: string) {
         if (this.slots[slot]) {
             this.slots[slot] = "none";
         }
-        // if (this.member.manageable) {
-        //     const name = this.member.nickname?.split(" ")[0]
-        //     if (!name) return;
-        //     const newName = name[0] + " " + name[1] + " " + this.toString()
-        //     return this.member.setNickname(newName, "Unequipped emote")
-        // }
+        if (this.member.manageable) {
+            const name = this.member.nickname?.split(" ")
+            if (!name) return;
+            const newName = name[0] + " " + name[1] + " " + this.toString()
+            return this.member.setNickname(newName, "Unequipped emote")
+        }
     }
 
     getSlotFromEmote(emote: string): string | undefined {
