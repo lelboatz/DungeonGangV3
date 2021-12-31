@@ -13,7 +13,7 @@ module.exports = class UnequipCommand extends BaseCommand {
             category: "Emote",
             usage: "unequip <slot>",
             guildOnly: true,
-            permLevel: 1,
+            permLevel: 0,
             slashCommandBody: new SlashCommandBuilder()
                 .setName("unequip")
                 .setDescription("Unequips an emote from a slot.")

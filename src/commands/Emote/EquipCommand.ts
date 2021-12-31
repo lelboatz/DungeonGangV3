@@ -13,7 +13,7 @@ module.exports = class EquipCommand extends BaseCommand {
             category: "Emote",
             usage: "equip <emote> <slot>",
             guildOnly: true,
-            permLevel: 1,
+            permLevel: 0,
             slashCommandBody: new SlashCommandBuilder()
                 .setName("equip")
                 .setDescription("Equips an emote in a slot.")

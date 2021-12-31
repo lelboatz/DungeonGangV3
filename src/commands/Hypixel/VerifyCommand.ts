@@ -92,7 +92,7 @@ module.exports = class VerifyCommand extends BaseCommand {
             await this.mongo.addUser(userSchema(interaction.user.id, mojang.id));
             user = await this.mongo.getUser(mojang.id) as MongoUser | undefined;
         } else {
-            if (user.discordId && user.discordId !== interaction.user.id) {
+            if (user.discordId && user.discordId !== interaction.user.id && user.discordId !== null) {
                 const otherMember = await this.fetchMember(user.discordId, interaction.guild!);
                 if (otherMember) {
                     return interaction.editReply({
@@ -103,6 +103,8 @@ module.exports = class VerifyCommand extends BaseCommand {
                 } else {
                     user.discordId = interaction.user.id;
                 }
+            } else {
+                user.discordId = interaction.user.id;
             }
         }
 

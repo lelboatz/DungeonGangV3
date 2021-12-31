@@ -160,7 +160,7 @@ module.exports = class ScanCommand extends BaseCommand {
                 await this.mongo.addUser(userSchema(member.id, mojang.id));
                 mongoUser = await this.mongo.getUser(mojang.id) as MongoUser | undefined;
             } else {
-                if (mongoUser.discordId && mongoUser.discordId !== member.id) {
+                if (mongoUser.discordId && mongoUser.discordId !== member.id && mongoUser.discordId !== null) {
                     const otherMember = await this.fetchMember(mongoUser.discordId, member.guild);
                     if (otherMember) {
                         channel?.send({
@@ -172,6 +172,8 @@ module.exports = class ScanCommand extends BaseCommand {
                     } else {
                         mongoUser.discordId = member.id;
                     }
+                } else {
+                    mongoUser.discordId = member.id;
                 }
             }
 
