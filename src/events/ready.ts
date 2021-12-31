@@ -1,4 +1,5 @@
 import { DungeonGang } from "../index";
+import EmojiManager from "../util/EmojiManager";
 
 module.exports = class {
     client: DungeonGang
@@ -9,5 +10,6 @@ module.exports = class {
         import ("../util/Console")
         console.log(`Logged in as ${this.client.user?.tag}`)
         this.client.user?.setStatus("online")
+        await EmojiManager.fetchAllEmotes()
     }
 }

@@ -34,7 +34,7 @@ module.exports = class {
             }
         }
         if (interaction.isAutocomplete()) {
-            if (interaction.commandName === "equip") {
+            if (["equip", "give", "take"].includes(interaction.commandName)) {
                 return EmojiManager.autocomplete(interaction);
             }
         }
