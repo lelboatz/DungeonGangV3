@@ -97,6 +97,14 @@ export default class EmojiManager {
         return Object.keys(this.slots).indexOf(slot) + 1
     }
 
+    getEmoteByName(name: string) {
+        for (const milestone of this.client.config.emotes.milestones) {
+            if (milestone.name === name) {
+                return milestone.emote;
+            }
+        }
+    }
+
     removeLockedEmotes() {
         for (const [key, value] of Object.entries(this.slots)) {
             if (value !== "none" && !this.emotes.includes(value as any)) {

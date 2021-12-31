@@ -190,7 +190,7 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
         let player;
         try {
             player = await this.hypixel.player.uuid(mojang.id);
-            discord = player.socialMedia?.links.DISCORD ?? player.socialMedia?.DISCORD;
+            discord = player.socialMedia?.links?.DISCORD ?? player.socialMedia?.DISCORD;
         } catch (error: any) {
             console.error(error);
             return interaction.editReply({
@@ -276,7 +276,7 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
         if (!profile) {
             dungeons = {
                 cataLevel: cataLevel ?? 0,
-                secrets: player.achievements.skyblock_treasure_hunter ?? 0,
+                secrets: player.achievements?.skyblock_treasure_hunter ?? 0,
                 bloodMobs: 0,
                 floorSeven: undefined,
                 masterFive: undefined,
@@ -285,7 +285,7 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
         } else {
             dungeons = {
                 cataLevel: cataLevel ?? Math.floor(convertXp(profile.members[mojang.id].dungeons?.dungeon_types.catacombs.experience ?? 0)),
-                secrets: player.achievements.skyblock_treasure_hunter ?? 0,
+                secrets: player.achievements?.skyblock_treasure_hunter ?? 0,
                 bloodMobs: (profile.members[mojang.id].stats.kills_watcher_summon_undead ?? 0) + (profile.members[mojang.id].stats.kills_watcher_summon_skeleton ?? 0) + (profile.members[mojang.id].stats.kills_master_watcher_summon_undead ?? 0),
                 floorSeven: profile.members[mojang.id].dungeons?.dungeon_types.catacombs.fastest_time_s_plus?.[7] ?? undefined,
                 masterFive: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs?.fastest_time_s_plus?.[5] ?? undefined,

@@ -25,6 +25,27 @@ async function getMojang(username: string, bypassMojangRateLimit?: boolean): Pro
     }
 }
 
+async function getMojangFromUuid(uuid: string): Promise<MojangResponse | "error"> {
+    if (mojangCache.has(uuid)) {
+        return mojangCache.get(uuid)!;
+    }
+    try {
+        const mojang = await axios.get(`https://sessionserver.mojang.com/session/minecraft/profile/${uuid}`);
+        if (mojang.data) {
+            mojangCache.set(uuid, {
+                id: mojang.data.id,
+                name: mojang.data.name
+            });
+        }
+        return {
+            id: mojang.data.id,
+            name: mojang.data.name
+        }
+    } catch (error) {
+        return "error";
+    }
+}
+
 function embed(title: string, description: string) {
     return new MessageEmbed()
         .setTitle(title)
@@ -207,4 +228,4 @@ function fmtMSS(number: number) {
 }
 
 
-export { getMojang, errorEmbed, ephemeralMessage, highestCataProfile, cataLevel, embed, fmtMSS, cataExp, validUnicode, MojangResponse }
+export { getMojang, errorEmbed, ephemeralMessage, highestCataProfile, cataLevel, embed, fmtMSS, cataExp, validUnicode, getMojangFromUuid, MojangResponse }

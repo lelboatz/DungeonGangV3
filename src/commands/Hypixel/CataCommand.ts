@@ -63,7 +63,7 @@ module.exports = class CataCommand extends BaseCommand {
             dungeons = {
                 cataLevel: 0,
                 cataXp: 0,
-                secrets: player.achievements.skyblock_treasure_hunter ?? 0,
+                secrets: player.achievements?.skyblock_treasure_hunter ?? 0,
                 bloodMobs: 0,
                 floorSeven: undefined,
                 masterFour: undefined,
@@ -78,7 +78,7 @@ module.exports = class CataCommand extends BaseCommand {
             dungeons = {
                 cataLevel: cataLevel(profile.members[mojang.id].dungeons?.dungeon_types.catacombs.experience ?? 0).toFixed(2),
                 cataXp: profile.members[mojang.id].dungeons?.dungeon_types.catacombs.experience ?? 0,
-                secrets: player.achievements.skyblock_treasure_hunter ?? 0,
+                secrets: player.achievements?.skyblock_treasure_hunter ?? 0,
                 bloodMobs: (profile.members[mojang.id].stats.kills_watcher_summon_undead ?? 0) + (profile.members[mojang.id].stats.kills_watcher_summon_skeleton ?? 0) + (profile.members[mojang.id].stats.kills_master_watcher_summon_undead ?? 0),
                 floorSeven: profile.members[mojang.id].dungeons?.dungeon_types.catacombs.fastest_time_s_plus?.[7] ?? undefined,
                 masterFour: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs?.fastest_time_s?.[4] ?? undefined,

@@ -62,6 +62,20 @@ module.exports = class EquipCommand extends BaseCommand {
         await manager.update()
         await manager.sync()
 
+        if (emote === manager.getEmoteByName("Top Player +") && manager.getEmoteByName("Speedrunner") && manager.getSlotFromEmote(manager.getEmoteByName("Speedrunner")!)) {
+            return interaction.editReply({
+                embeds: [
+                    errorEmbed(`You cannot equip Top Player + and Speedrunner emotes at the same time.`)
+                ]
+            })
+        } else if (emote === manager.getEmoteByName("Speedrunner") && manager.getEmoteByName("Top Player +") && manager.getSlotFromEmote(manager.getEmoteByName("Top Player +")!)) {
+            return interaction.editReply({
+                embeds: [
+                    errorEmbed(`You cannot equip Top Player + and Speedrunner emotes at the same time.`)
+                ]
+            })
+        }
+
         if (!manager.emotes.includes(emote)) {
             return interaction.editReply({
                 embeds: [
