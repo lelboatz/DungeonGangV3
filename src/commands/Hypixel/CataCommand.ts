@@ -93,11 +93,16 @@ module.exports = class CataCommand extends BaseCommand {
         let YES = "<:yes:838801988241588304>", NO = "<:no:838802013541498890>"
 
 
-        let tpm = NO, tp = NO, tpp = NO, speedrunner = NO, votedOut = NO, plusReq = NO;
+        let tpm = NO, tp = NO, tpp = NO, speedrunner = NO, votedOut = NO, secretDuper = NO;
+
+        if (dungeons.secrets >= 100000) {
+            secretDuper = YES;
+        }
 
         if ((dungeons.secrets >= 50000 || dungeons.bloodMobs >= 45000) && dungeons.cataLevel >= 48 && dungeons.masterSix) {
             if (dungeons.masterSix <= 195000) {
                 tpp = YES;
+                tp = YES;
             }
         }
 
@@ -149,10 +154,12 @@ module.exports = class CataCommand extends BaseCommand {
                     .addField("**Qualifications**",
                         `<@&${this.client.config.discord.roles.topPlayer.minus}> ${tpm}\n` +
                         `<@&${this.client.config.discord.roles.topPlayer.normal}> ${tp}\n` +
-                        `<@&${this.client.config.discord.roles.topPlayer.plus}> ${tpp}\n` +
+                        `<@&${this.client.config.discord.roles.topPlayer.plus}> ${tpp}`, true
+                    )
+                    .addField("ㅤ",
                         `<@&${this.client.config.discord.roles.misc.speedRunner}> ${speedrunner}\n` +
-                        `<@&${this.client.config.discord.roles.topPlayer.plusReq}> ${NO}\n` +
-                        `<@&${this.client.config.discord.roles.topPlayer.votedOut}> ${NO}`, false
+                        `<@&${this.client.config.discord.roles.misc.secretDuper}> ${secretDuper}\n` +
+                        `<@&${this.client.config.discord.roles.topPlayer.votedOut}> ${NO}`, true
                     )
                     .setFooter(this.client.user?.username as string, this.client.user?.avatarURL()?.toString())
                     .setColor("#B5FF59")
