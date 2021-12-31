@@ -25,7 +25,7 @@ module.exports = class EmojiCommand extends BaseCommand {
     }
     async execute(interaction: CommandInteraction) {
         await interaction.deferReply({
-            ephemeral: ephemeralMessage(interaction.channelId)
+            ephemeral: true
         })
 
         if (!interaction.options.getUser("user")) {

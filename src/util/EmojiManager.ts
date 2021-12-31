@@ -218,8 +218,20 @@ export default class EmojiManager {
                     return interaction.respond(response);
                 }
             } else if (interaction.commandName === "take") {
-                const manager = new this(interaction.member as GuildMember)
+                const user = interaction.options.get("user")
+                if (!user?.value) {
+                    return interaction.respond([])
+                }
+                const member = await client.commands.get("take").fetchMember(user.value, interaction.guild!)
+                if (!member) {
+                    return interaction.respond([])
+                }
+
+                const manager = new this(member as GuildMember)
                 await manager.update();
+                if (!manager.user) {
+                    return interaction.respond([])
+                }
                 await manager.sync()
                 const response = [];
                 for (const emote of manager.user?.emotes.given!) {

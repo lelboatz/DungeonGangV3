@@ -33,7 +33,7 @@ module.exports = class EquipCommand extends BaseCommand {
     }
     async execute(interaction: CommandInteraction) {
         await interaction.deferReply({
-            ephemeral: ephemeralMessage(interaction.channelId)
+            ephemeral: true
         })
 
         const emote = interaction.options.getString("emote", true)

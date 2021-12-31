@@ -26,7 +26,7 @@ module.exports = class UnequipCommand extends BaseCommand {
     }
     async execute(interaction: CommandInteraction) {
         await interaction.deferReply({
-            ephemeral: ephemeralMessage(interaction.channelId)
+            ephemeral: true
         })
 
         const slot = interaction.options.getInteger("slot", true);

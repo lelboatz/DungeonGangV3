@@ -33,7 +33,7 @@ module.exports = class TakeCommand extends BaseCommand {
     }
     async execute(interaction: CommandInteraction) {
         await interaction.deferReply({
-            ephemeral: ephemeralMessage(interaction.channelId)
+            ephemeral: true
         })
 
         const userOption = interaction.options.getUser("user", true)
