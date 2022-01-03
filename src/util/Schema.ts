@@ -17,11 +17,12 @@ function userSchema(id: Snowflake, uuid: string): MongoUser {
     }
 }
 
-function pollSchema(message: Message, mojang: MojangResponse): MongoPoll {
+function pollSchema(message: Message, mojang: MojangResponse, indentifier: string): MongoPoll {
     let endDate = new Date();
     endDate.setHours(endDate.getHours() + 12);
     return {
         _id: message.id,
+        identifier: indentifier,
         channel: message.channel.id,
         uuid: mojang.id,
         username: mojang.name,

@@ -22,6 +22,11 @@ module.exports = class PollCommand extends BaseCommand {
                     .setRequired(true)
                     .setDescription("The username of the user to poll.")
                 )
+                .addStringOption(option => option
+                    .setName("identifier")
+                    .setDescription("Unique identifier for the poll.")
+                    .setRequired(true)
+                )
         })
     }
     async execute(interaction: CommandInteraction) {
@@ -29,7 +34,7 @@ module.exports = class PollCommand extends BaseCommand {
             ephemeral: ephemeralMessage(interaction.channelId)
         })
 
-        const response = await PollManager.create(interaction.options.getString("username", true));
+        const response = await PollManager.create(interaction.options.getString("username", true), interaction.options.getString("identifier", true))
 
         if (response.success) {
             return interaction.editReply({

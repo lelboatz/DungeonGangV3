@@ -22,6 +22,7 @@ export interface MongoUser {
 
 export interface MongoPoll {
     _id: Snowflake;
+    identifier?: string;
     channel: Snowflake;
     username: string;
     uuid: string;

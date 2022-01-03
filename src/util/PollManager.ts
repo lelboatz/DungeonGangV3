@@ -31,7 +31,7 @@ class PollManager {
         return this;
     }
 
-    async create(username: string): Promise<{ success: false, message: string} | { success: true, message: string, poll: MongoPoll}> {
+    async create(username: string, identifier: string): Promise<{ success: false, message: string} | { success: true, message: string, poll: MongoPoll}> {
         const mojang = await getMojang(username);
         if (!mojang || mojang === "error") {
             return {
@@ -101,7 +101,7 @@ class PollManager {
                             "url": this.client.user?.avatarURL()?.toString()
                         },
                         "author": {
-                            "name": "➤ " + mojang.name,
+                            "name": "➤ " + mojang.name + ` (${identifier})`,
                             "icon_url": `https://crafatar.com/avatars/${mojang.id}?overlay`,
                             "url": "https://sky.shiiyu.moe/stats/" + mojang.name
                         },
@@ -179,7 +179,7 @@ class PollManager {
             }
         }
 
-        const poll = pollSchema(message, mojang)
+        const poll = pollSchema(message, mojang, identifier)
 
         poll.stats = stats;
 
@@ -239,7 +239,7 @@ class PollManager {
                                 "url": this.client.user?.avatarURL()?.toString()
                             },
                             "author": {
-                                "name": "➤ " + poll.username,
+                                "name": "➤ " + poll.username + poll.identifier ? ` (${poll.identifier})` : "",
                                 "icon_url": `https://crafatar.com/avatars/${poll.uuid}?overlay`,
                                 "url": "https://sky.shiiyu.moe/stats/" + poll.username
                             },
