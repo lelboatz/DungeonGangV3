@@ -86,82 +86,91 @@ module.exports = class ScanCommand extends BaseCommand {
     }
 
     async scan(members: Collection<string, GuildMember>, channel: TextChannel | undefined, role: Role) {
-        for (const [, member] of members) {
-            let mongoUser = await this.client.mongo.getUserByDiscord(member.user.id) as MongoUser | undefined;
 
-            let mojang;
+        let loop = (i: number) => {
+            setTimeout(async () => {
+                const member = members.toJSON()[i - 1]
+                let mongoUser = await this.client.mongo.getUserByDiscord(member.user.id) as MongoUser | undefined;
 
-            if (!mongoUser) {
-                let username;
-                try {
-                    username = member.displayName.split(" ")[1].replace(/\W/g, '')
-                } catch (error) {
-                    channel?.send({
-                        embeds: [
-                            errorEmbed(`Failed to get username for ${member.toString()} from nickname. This user is also not in the database. Skipping this member.`)
-                        ]
-                    })
-                    continue;
-                }
+                let mojang;
 
-                mojang = await getMojang(username);
-
-                if (mojang === "error" || !mojang) {
-                    channel?.send({
-                        embeds: [
-                            errorEmbed(`Could not find user \`${username}\`. This user is also not in the database. Skipping this member.`)
-                        ]
-                    })
-                    continue;
-                }
-            } else {
-                mojang = await getMojangFromUuid(mongoUser.uuid);
-                if (mojang === "error" || !mojang) {
-                    channel?.send({
-                        embeds: [
-                            errorEmbed(`An error occured while fetching the user's UUID. Skipping this member.`)
-                        ]
-                    })
-                    continue;
-                }
-            }
-
-            const response = await VerificationManager.verify(mojang.name, member, {
-                handler: `Scanning all users in the role: ${role.name}`,
-                forceUpdate: {
-                    mojang
-                }
-            })
-
-            if (!response.success) {
-                let embed: MessageEmbed;
-                switch (response.code!) {
-                    case VerifyErrors.HYPIXEL_ERROR: {
-                        embed = errorEmbed(`There was an error while accessing the Hypixel API for ${member.toString()} (\`${mojang.name}\`): ${response.message}. Skipping this member.`)
-                        break;
+                if (!mongoUser) {
+                    let username;
+                    try {
+                        username = member.displayName.split(" ")[1].replace(/\W/g, '')
+                    } catch (error) {
+                        channel?.send({
+                            embeds: [
+                                errorEmbed(`Failed to get username for ${member.toString()} from nickname. This user is also not in the database. Skipping this member.`)
+                            ]
+                        })
+                        return cont();
                     }
-                    case VerifyErrors.NO_DISCORD: {
-                        embed = errorEmbed(`There is no linked Discord account on Hypixel for ${member.toString()} (\`${mojang.name}\`). Skipping this member.`)
-                        break;
+
+                    mojang = await getMojang(username);
+
+                    if (mojang === "error" || !mojang) {
+                        channel?.send({
+                            embeds: [
+                                errorEmbed(`Could not find user \`${username}\`. This user is also not in the database. Skipping this member.`)
+                            ]
+                        })
+                        return cont();
                     }
-                    case VerifyErrors.HYPIXEL_DISCORD_MISMATCH: {
-                        embed = errorEmbed(`The minecraft account for ${member.toString()} (\`${mojang.name}\`) is linked to a different discord account on Hypixel. \n\nTheir Tag: ${member.user.tag}\nHypixel Tag: ${response.tag}\n\nSkipping this member.`)
-                        break;
-                    }
-                    case VerifyErrors.MONGO_DISCORD_MISMATCH: {
-                        embed = errorEmbed(`The minecraft account \`${response.mojang!.name}\` is linked to a different discord account on this server. Skipping this member.`)
-                        break;
-                    }
-                    default: {
-                        embed = errorEmbed(`An unknown error has occurred. Please report this to the bot dev.`);
+                } else {
+                    mojang = await getMojangFromUuid(mongoUser.uuid);
+                    if (mojang === "error" || !mojang) {
+                        channel?.send({
+                            embeds: [
+                                errorEmbed(`An error occured while fetching the user's UUID. Skipping this member.`)
+                            ]
+                        })
+                        return cont()
                     }
                 }
-                channel?.send({
-                    embeds: [
-                        embed
-                    ]
+
+                const response = await VerificationManager.verify(mojang.name, member, {
+                    handler: `Scanning all users in the role: ${role.name}`,
+                    forceUpdate: {
+                        mojang
+                    }
                 })
-            }
+
+                if (!response.success) {
+                    let embed: MessageEmbed;
+                    switch (response.code!) {
+                        case VerifyErrors.HYPIXEL_ERROR: {
+                            embed = errorEmbed(`There was an error while accessing the Hypixel API for ${member.toString()} (\`${mojang.name}\`): ${response.message}. Skipping this member.`)
+                            break;
+                        }
+                        case VerifyErrors.NO_DISCORD: {
+                            embed = errorEmbed(`There is no linked Discord account on Hypixel for ${member.toString()} (\`${mojang.name}\`). Skipping this member.`)
+                            break;
+                        }
+                        case VerifyErrors.HYPIXEL_DISCORD_MISMATCH: {
+                            embed = errorEmbed(`The minecraft account for ${member.toString()} (\`${mojang.name}\`) is linked to a different discord account on Hypixel. \n\nTheir Tag: ${member.user.tag}\nHypixel Tag: ${response.tag}\n\nSkipping this member.`)
+                            break;
+                        }
+                        case VerifyErrors.MONGO_DISCORD_MISMATCH: {
+                            embed = errorEmbed(`The minecraft account \`${response.mojang!.name}\` is linked to a different discord account on this server. Skipping this member.`)
+                            break;
+                        }
+                        default: {
+                            embed = errorEmbed(`An unknown error has occurred. Please report this to the bot dev.`);
+                        }
+                    }
+                    channel?.send({
+                        embeds: [
+                            embed
+                        ]
+                    })
+                }
+                function cont() {
+                    if (--i) loop(i);
+                }
+                if (--i) loop(i);
+            }, 750)
         }
+        (loop)(members.size)
     }
 }
