@@ -5,7 +5,7 @@ import { TextChannel } from "discord.js";
 
 const Discord = require('discord.js');
 
-const logChannel = client.channels.cache.get(client.config.discord.logChannel) as TextChannel
+export const logChannel = client.channels.cache.get(client.config.discord.logChannel) as TextChannel
 
 let newConsole = (function (oldCons) {
     let newFuncs = {

@@ -122,4 +122,8 @@ export default class MongoUtils {
         // @ts-ignore
         return this.mongo?.collection("polls").updateOne({ _id: id }, { $set: { votes: votes } })
     }
+
+    getPollByIdentifier(identifier: string) {
+        return this.mongo?.collection("polls").findOne({ identifier: identifier })
+    }
 }

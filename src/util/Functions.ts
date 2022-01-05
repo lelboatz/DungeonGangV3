@@ -177,7 +177,7 @@ function cataExp(level: number) {
 function highestCataProfile(profiles: Components.Schemas.SkyBlockProfileCuteName[] & {meta: Omit<Paths.SkyblockProfiles.Get.Responses.$200, "profiles"> & DefaultMeta}, uuid: string) {
     try {
         if (profiles === null) {
-            return void 0;
+            return undefined;
         }
         let latestProfile;
         for (let i = 0; i < profiles.length; i++) {
@@ -193,7 +193,7 @@ function highestCataProfile(profiles: Components.Schemas.SkyBlockProfileCuteName
         return latestProfile;
     } catch (error) {
         console.error(error)
-        return void 0;
+        return undefined;
     }
 }
 
@@ -201,7 +201,7 @@ function highestCataProfileOld(profiles: Components.Schemas.SkyBlockProfileCuteN
     try {
         let highestCataXp = -1;
         let highestProfile;
-        if (profiles === null) return void 0;
+        if (profiles === null) return undefined;
         for (let i = 0; i < profiles.length; i++) {
             if (profiles[i]?.members[uuid].dungeons?.dungeon_types.catacombs.experience) {
                 let cataXp = profiles[i]?.members[uuid].dungeons?.dungeon_types.catacombs.experience as number
@@ -213,7 +213,26 @@ function highestCataProfileOld(profiles: Components.Schemas.SkyBlockProfileCuteN
         }
         return highestProfile;
     } catch (error) {
-        return void 0;
+        return undefined;
+    }
+}
+
+function getProfileByName(profiles: Components.Schemas.SkyBlockProfileCuteName[] & {meta: Omit<Paths.SkyblockProfiles.Get.Responses.$200, "profiles"> & DefaultMeta}, name: string) {
+    try {
+        if (profiles === null) {
+            return undefined;
+        }
+        if (profiles.length === 0) {
+            return undefined;
+        }
+        for (let i = 0; i < profiles.length; i++) {
+            if (profiles[i]?.cute_name.toLowerCase() === name.toLowerCase()) {
+                return profiles[i];
+            }
+        }
+        return null;
+    } catch (error) {
+        return undefined;
     }
 }
 
@@ -228,4 +247,4 @@ function fmtMSS(number: number) {
 }
 
 
-export { getMojang, errorEmbed, ephemeralMessage, highestCataProfile, cataLevel, embed, fmtMSS, cataExp, validUnicode, getMojangFromUuid, MojangResponse }
+export { getMojang, errorEmbed, ephemeralMessage, highestCataProfileOld, highestCataProfile, getProfileByName, cataLevel, embed, fmtMSS, cataExp, validUnicode, getMojangFromUuid, MojangResponse }
