@@ -107,4 +107,5 @@ dist
 
 .idea
 config.json
+mainconfig.json
 build
