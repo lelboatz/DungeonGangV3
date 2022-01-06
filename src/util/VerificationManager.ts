@@ -351,6 +351,7 @@ class VerificationManager {
         }), tp = this.meetsTopNormalReqs(dungeons), tpm = this.meetsTopMinusReqs(dungeons), speedrunner = this.meetsSpeedrunnerReqs(dungeons), secretDuper = this.meetsSecretDuperReqs(dungeons);
 
         if (tpp || tp) tpm = false;
+        if (tpp) tp = true;
 
         // Removing Roles from Array
 
