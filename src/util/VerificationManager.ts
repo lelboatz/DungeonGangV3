@@ -39,6 +39,21 @@ export interface VerifyOptions {
     handler: string;
 }
 
+export interface VerifyDungeonData {
+    cataLevel: number;
+    secrets: number;
+    bloodMobs: number;
+    floorSeven: number | undefined;
+    masterFive: number | undefined;
+    masterSix: number | undefined;
+    masterSeven: number | undefined;
+}
+
+export interface MeetsReqsOptions {
+    votedIn: boolean
+    votedOut: boolean
+}
+
 export enum VerifyErrors {
     INVALID_USERNAME,
     HYPIXEL_ERROR,
@@ -291,7 +306,8 @@ class VerificationManager {
                 bloodMobs: 0,
                 floorSeven: undefined,
                 masterFive: undefined,
-                masterSix: undefined
+                masterSix: undefined,
+                masterSeven: undefined
             }
         } else {
             dungeons = {
@@ -300,7 +316,8 @@ class VerificationManager {
                 bloodMobs: (profile.members[mojang.id].stats.kills_watcher_summon_undead ?? 0) + (profile.members[mojang.id].stats.kills_watcher_summon_skeleton ?? 0) + (profile.members[mojang.id].stats.kills_master_watcher_summon_undead ?? 0),
                 floorSeven: profile.members[mojang.id].dungeons?.dungeon_types.catacombs.fastest_time_s_plus?.[7] ?? undefined,
                 masterFive: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs?.fastest_time_s_plus?.[5] ?? undefined,
-                masterSix: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs?.fastest_time_s_plus?.[6] ?? undefined
+                masterSix: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs?.fastest_time_s_plus?.[6] ?? undefined,
+                masterSeven: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs?.fastest_time_s_plus?.[7] ?? undefined
             }
         }
 
@@ -328,50 +345,12 @@ class VerificationManager {
             await this.client.mongo.updateUser(user)
         }
 
-        let tpp = false, tp = false, tpm = false, speedrunner = false, secretDuper = false;
+        let tpp = this.meetsTopPlusReqs(dungeons, {
+            votedOut: user?.votedOut ?? false,
+            votedIn: user?.votedIn ?? false,
+        }), tp = this.meetsTopNormalReqs(dungeons), tpm = this.meetsTopMinusReqs(dungeons), speedrunner = this.meetsSpeedrunnerReqs(dungeons), secretDuper = this.meetsSecretDuperReqs(dungeons);
 
-        if ((dungeons.secrets >= 50000 || dungeons.bloodMobs >= 45000) && dungeons.cataLevel >= 48 && dungeons.masterSix) {
-            if (dungeons.masterSix <= 195000 && !member.roles.cache.has(this.client.config.discord.roles.topPlayer.votedOut)) {
-                tpp = true;
-            }
-        }
-
-        if (member.roles.cache.has(this.client.config.discord.roles.topPlayer.plusReq)) {
-            tpp = true;
-        }
-
-        if (!tpp && dungeons.cataLevel >= 45 && dungeons.secrets >= 30000 && (dungeons.floorSeven || dungeons.masterFive || dungeons.masterSix)) {
-            if (dungeons.floorSeven && dungeons.floorSeven <= 225000) {
-                tp = true;
-            }
-            if (dungeons.masterFive && dungeons.masterFive <= 150000) {
-                tp = true;
-            }
-            if (dungeons.masterSix && dungeons.masterSix <= 225000) {
-                tp = true;
-            }
-        }
-
-        if ((!tp && !tpp) && dungeons.cataLevel >= 42 && dungeons.secrets >= 20000 && (dungeons.floorSeven || dungeons.masterFive)) {
-            if (dungeons.floorSeven && dungeons.floorSeven <= 260000) {
-                tpm = true;
-            }
-            if (dungeons.masterFive && dungeons.masterFive <= 165000) {
-                tpm = true;
-            }
-        }
-
-        if (tpp) tp = true;
-
-        if (dungeons.masterSix) {
-            if (dungeons.masterSix <= 170000) {
-                speedrunner = true;
-            }
-        }
-
-        if (dungeons.secrets >= 100000) {
-            secretDuper = true;
-        }
+        if (tpp || tp) tpm = false;
 
         // Removing Roles from Array
 
@@ -381,46 +360,46 @@ class VerificationManager {
             }
         }
 
-        if (rolesArray.includes(this.client.config.discord.roles.topPlayer.plus)) {
-            rolesArray.splice(rolesArray.indexOf(this.client.config.discord.roles.topPlayer.plus), 1)
+        if (rolesArray.includes(this.client.config.requirements.topPlus.role)) {
+            rolesArray.splice(rolesArray.indexOf(this.client.config.requirements.topPlus.role), 1)
         }
 
-        if (rolesArray.includes(this.client.config.discord.roles.topPlayer.normal)) {
-            rolesArray.splice(rolesArray.indexOf(this.client.config.discord.roles.topPlayer.normal), 1)
+        if (rolesArray.includes(this.client.config.requirements.topNormal.role)) {
+            rolesArray.splice(rolesArray.indexOf(this.client.config.requirements.topNormal.role), 1)
         }
 
-        if (rolesArray.includes(this.client.config.discord.roles.topPlayer.minus)) {
-            rolesArray.splice(rolesArray.indexOf(this.client.config.discord.roles.topPlayer.minus), 1)
+        if (rolesArray.includes(this.client.config.requirements.topMinus.role)) {
+            rolesArray.splice(rolesArray.indexOf(this.client.config.requirements.topMinus.role), 1)
         }
 
-        if (rolesArray.includes(this.client.config.discord.roles.misc.speedRunner)) {
-            rolesArray.splice(rolesArray.indexOf(this.client.config.discord.roles.misc.speedRunner), 1)
+        if (rolesArray.includes(this.client.config.requirements.speedrunner.role)) {
+            rolesArray.splice(rolesArray.indexOf(this.client.config.requirements.speedrunner.role), 1)
         }
 
-        if (rolesArray.includes(this.client.config.discord.roles.misc.secretDuper)) {
-            rolesArray.splice(rolesArray.indexOf(this.client.config.discord.roles.misc.secretDuper), 1)
+        if (rolesArray.includes(this.client.config.requirements.secretDuper.role)) {
+            rolesArray.splice(rolesArray.indexOf(this.client.config.requirements.secretDuper.role), 1)
         }
 
         // Adding Roles to Array
 
-        if (tpp && !rolesArray.includes(this.client.config.discord.roles.topPlayer.plus)) {
-            rolesArray.push(this.client.config.discord.roles.topPlayer.plus)
+        if (tpp && !rolesArray.includes(this.client.config.requirements.topPlus.role)) {
+            rolesArray.push(this.client.config.requirements.topPlus.role)
         }
 
-        if (tp && !rolesArray.includes(this.client.config.discord.roles.topPlayer.normal)) {
-            rolesArray.push(this.client.config.discord.roles.topPlayer.normal)
+        if (tp && !rolesArray.includes(this.client.config.requirements.topNormal.role)) {
+            rolesArray.push(this.client.config.requirements.topNormal.role)
         }
 
-        if (tpm && !rolesArray.includes(this.client.config.discord.roles.topPlayer.minus)) {
-            rolesArray.push(this.client.config.discord.roles.topPlayer.minus)
+        if (tpm && !rolesArray.includes(this.client.config.requirements.topMinus.role)) {
+            rolesArray.push(this.client.config.requirements.topMinus.role)
         }
 
-        if (speedrunner && !rolesArray.includes(this.client.config.discord.roles.misc.speedRunner)) {
-            rolesArray.push(this.client.config.discord.roles.misc.speedRunner)
+        if (speedrunner && !rolesArray.includes(this.client.config.requirements.speedrunner.role)) {
+            rolesArray.push(this.client.config.requirements.speedrunner.role)
         }
 
-        if (secretDuper && !rolesArray.includes(this.client.config.discord.roles.misc.secretDuper)) {
-            rolesArray.push(this.client.config.discord.roles.misc.secretDuper)
+        if (secretDuper && !rolesArray.includes(this.client.config.requirements.secretDuper.role)) {
+            rolesArray.push(this.client.config.requirements.secretDuper.role)
         }
 
 
@@ -529,6 +508,148 @@ class VerificationManager {
 
     arrayRoleIds(roles: GuildMemberRoleManager) {
         return roles.cache.map(role => role.id)
+    }
+
+    meetsTopPlusReqs(dungeons: VerifyDungeonData, options: MeetsReqsOptions) {
+        if (options.votedIn) {
+            return true
+        }
+        if (options.votedOut) {
+            return false
+        }
+
+        let meetsCata = false
+        let meetsSecrets = false
+        let meetsBloodMobs = false
+        let meetsFloorSeven = false
+        let meetsMasterFive = false
+        let meetsMasterSix = false
+        let meetsMasterSeven = false
+
+        if (dungeons.cataLevel && dungeons.cataLevel >= this.client.config.requirements.topPlus.cata) {
+            meetsCata = true
+        }
+        if (!dungeons.cataLevel) {
+            meetsCata = true
+        }
+        if (this.client.config.requirements.topPlus.secrets !== null && dungeons.secrets >= this.client.config.requirements.topPlus.secrets) {
+            meetsSecrets = true
+        }
+        if (this.client.config.requirements.topPlus.bloodMobs !== null && dungeons.bloodMobs >= this.client.config.requirements.topPlus.bloodMobs) {
+            meetsBloodMobs = true
+        }
+        if (this.client.config.requirements.topPlus.floorSeven && dungeons.floorSeven && dungeons.floorSeven <= this.client.config.requirements.topPlus.floorSeven * 1000) {
+            meetsFloorSeven = true
+        }
+        if (this.client.config.requirements.topPlus.masterFive && dungeons.masterFive && dungeons.masterFive <= this.client.config.requirements.topPlus.masterFive * 1000) {
+            meetsMasterFive = true
+        }
+        if (this.client.config.requirements.topPlus.masterSix && dungeons.masterSix && dungeons.masterSix <= this.client.config.requirements.topPlus.masterSix * 1000) {
+            meetsMasterSix = true
+        }
+        if (this.client.config.requirements.topPlus.masterSeven && dungeons.masterSeven && dungeons.masterSeven <= this.client.config.requirements.topPlus.masterSeven * 1000) {
+            meetsMasterSeven = true
+        }
+
+        return meetsCata && (meetsSecrets || meetsBloodMobs) && (meetsFloorSeven || meetsMasterFive || meetsMasterSix || meetsMasterSeven);
+
+    }
+
+    meetsTopNormalReqs(dungeons: VerifyDungeonData) {
+        let meetsCata = false
+        let meetsSecrets = false
+        let meetsBloodMobs = false
+        let meetsFloorSeven = false
+        let meetsMasterFive = false
+        let meetsMasterSix = false
+        let meetsMasterSeven = false
+
+        if (dungeons.cataLevel && dungeons.cataLevel >= this.client.config.requirements.topNormal.cata) {
+            meetsCata = true
+        }
+        if (!dungeons.cataLevel) {
+            meetsCata = true
+        }
+        if (this.client.config.requirements.topNormal.secrets !== null && dungeons.secrets >= this.client.config.requirements.topNormal.secrets) {
+            meetsSecrets = true
+        }
+        if (this.client.config.requirements.topNormal.bloodMobs !== null && dungeons.bloodMobs >= this.client.config.requirements.topNormal.bloodMobs) {
+            meetsBloodMobs = true
+        }
+        if (this.client.config.requirements.topNormal.floorSeven && dungeons.floorSeven && dungeons.floorSeven <= this.client.config.requirements.topNormal.floorSeven * 1000) {
+            meetsFloorSeven = true
+        }
+        if (this.client.config.requirements.topNormal.masterFive && dungeons.masterFive && dungeons.masterFive <= this.client.config.requirements.topNormal.masterFive * 1000) {
+            meetsMasterFive = true
+        }
+        if (this.client.config.requirements.topNormal.masterSix && dungeons.masterSix && dungeons.masterSix <= this.client.config.requirements.topNormal.masterSix * 1000) {
+            meetsMasterSix = true
+        }
+        if (this.client.config.requirements.topNormal.masterSeven && dungeons.masterSeven && dungeons.masterSeven <= this.client.config.requirements.topNormal.masterSeven * 1000) {
+            meetsMasterSeven = true
+        }
+
+        return meetsCata && (meetsSecrets || meetsBloodMobs) && (meetsFloorSeven || meetsMasterFive || meetsMasterSix || meetsMasterSeven)
+    }
+
+    meetsTopMinusReqs(dungeons: VerifyDungeonData) {
+        let meetsCata = false
+        let meetsSecrets = false
+        let meetsBloodMobs = false
+        let meetsFloorSeven = false
+        let meetsMasterFive = false
+        let meetsMasterSix = false
+        let meetsMasterSeven = false
+
+        if (dungeons.cataLevel && dungeons.cataLevel >= this.client.config.requirements.topMinus.cata) {
+            meetsCata = true
+        }
+        if (!dungeons.cataLevel) {
+            meetsCata = true
+        }
+        if (this.client.config.requirements.topMinus.secrets !== null && dungeons.secrets >= this.client.config.requirements.topMinus.secrets) {
+            meetsSecrets = true
+        }
+        if (this.client.config.requirements.topMinus.bloodMobs !== null && dungeons.bloodMobs >= this.client.config.requirements.topMinus.bloodMobs) {
+            meetsBloodMobs = true
+        }
+        if (this.client.config.requirements.topMinus.floorSeven && dungeons.floorSeven && dungeons.floorSeven <= this.client.config.requirements.topMinus.floorSeven * 1000) {
+            meetsFloorSeven = true
+        }
+        if (this.client.config.requirements.topMinus.masterFive && dungeons.masterFive && dungeons.masterFive <= this.client.config.requirements.topMinus.masterFive * 1000) {
+            meetsMasterFive = true
+        }
+        if (this.client.config.requirements.topMinus.masterSix && dungeons.masterSix && dungeons.masterSix <= this.client.config.requirements.topMinus.masterSix * 1000) {
+            meetsMasterSix = true
+        }
+        if (this.client.config.requirements.topMinus.masterSeven && dungeons.masterSeven && dungeons.masterSeven <= this.client.config.requirements.topMinus.masterSeven * 1000) {
+            meetsMasterSeven = true
+        }
+
+        return meetsCata && (meetsSecrets || meetsBloodMobs) && (meetsFloorSeven || meetsMasterFive || meetsMasterSix || meetsMasterSeven)
+    }
+
+    meetsSpeedrunnerReqs(dungeons: VerifyDungeonData) {
+        let meetsMasterFive = false
+        let meetsMasterSix = false
+        let meetsMasterSeven = false
+
+        if (this.client.config.requirements.speedrunner.masterFive && dungeons.masterFive && dungeons.masterFive <= this.client.config.requirements.speedrunner.masterFive * 1000) {
+            meetsMasterFive = true
+        }
+        if (this.client.config.requirements.speedrunner.masterSix && dungeons.masterSix && dungeons.masterSix <= this.client.config.requirements.speedrunner.masterSix * 1000) {
+            meetsMasterSix = true
+        }
+        if (this.client.config.requirements.speedrunner.masterSeven && dungeons.masterSeven && dungeons.masterSeven <= this.client.config.requirements.speedrunner.masterSeven * 1000) {
+            meetsMasterSeven = true
+        }
+
+        return ( meetsMasterFive || meetsMasterSix || meetsMasterSeven)
+    }
+
+    meetsSecretDuperReqs(dungeons: VerifyDungeonData) {
+        return this.client.config.requirements.secretDuper.secrets !== null && dungeons.secrets >= this.client.config.requirements.secretDuper.secrets;
+
     }
 }
 

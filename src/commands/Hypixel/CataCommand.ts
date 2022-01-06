@@ -13,6 +13,7 @@ import {
     getProfileByName
 } from "../../util/Functions";
 import { MongoUser } from "../../util/Mongo";
+import VerificationManager from "../../util/VerificationManager";
 
 module.exports = class CataCommand extends BaseCommand {
     constructor(client: DungeonGang) {
@@ -97,6 +98,7 @@ module.exports = class CataCommand extends BaseCommand {
                 masterFour: undefined,
                 masterFive: undefined,
                 masterSix: undefined,
+                masterSeven: undefined,
                 floorSevenCompletions: 0,
                 masterFourCompletions: 0,
                 masterFiveCompletions: 0,
@@ -112,6 +114,7 @@ module.exports = class CataCommand extends BaseCommand {
                 masterFour: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs?.fastest_time_s?.[4] ?? undefined,
                 masterFive: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs?.fastest_time_s_plus?.[5] ?? undefined,
                 masterSix: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs?.fastest_time_s_plus?.[6] ?? undefined,
+                masterSeven: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs?.fastest_time_s_plus?.[7] ?? undefined,
                 floorSevenCompletions: profile.members[mojang.id].dungeons?.dungeon_types.catacombs.tier_completions?.[7] ?? 0,
                 masterFourCompletions: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs?.tier_completions?.[4] ?? 0,
                 masterFiveCompletions: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs?.tier_completions?.[5] ?? 0,
@@ -136,49 +139,40 @@ module.exports = class CataCommand extends BaseCommand {
             }
         }
 
-        if (dungeons.secrets >= 100000) {
+        const verifyDungeonData = {
+            cataLevel: parseFloat(dungeons.cataLevel.toString()),
+            secrets: dungeons.secrets,
+            bloodMobs: dungeons.bloodMobs,
+            floorSeven: dungeons.floorSeven,
+            masterFour: dungeons.masterFour,
+            masterFive: dungeons.masterFive,
+            masterSix: dungeons.masterSix,
+            masterSeven: dungeons.masterSeven,
+        }
+
+        if (VerificationManager.meetsSecretDuperReqs(verifyDungeonData)) {
             secretDuper = YES;
         }
 
-        if ((dungeons.secrets >= 50000 || dungeons.bloodMobs >= 45000) && dungeons.cataLevel >= 48 && dungeons.masterSix) {
-            if (dungeons.masterSix <= 195000) {
-                if (votedOut !== YES) {
-                    tpp = YES;
-                    tp = YES;
-                }
-            }
+        if (VerificationManager.meetsTopPlusReqs(verifyDungeonData, {
+            votedIn: user?.votedIn ?? false,
+            votedOut: user?.votedOut ?? false,
+        })) {
+            tpp = YES;
         }
 
-        if (votedIn) {
-            tpp = YES;
+        if (VerificationManager.meetsTopNormalReqs(verifyDungeonData)) {
             tp = YES;
         }
 
-        if ((tpp === NO) && dungeons.cataLevel >= 45 && dungeons.secrets >= 30000 && (dungeons.floorSeven || dungeons.masterFive || dungeons.masterSix)) {
-            if (dungeons.floorSeven && dungeons.floorSeven <= 225000) {
-                tp = YES;
-            }
-            if (dungeons.masterFive && dungeons.masterFive <= 150000) {
-                tp = YES;
-            }
-            if (dungeons.masterSix && dungeons.masterSix <= 225000) {
-                tp = YES;
-            }
-        }
-
-        if ((tp === NO && tpp === NO) && dungeons.cataLevel >= 42 && dungeons.secrets >= 20000 && (dungeons.floorSeven || dungeons.masterFive)) {
-            if (dungeons.floorSeven && dungeons.floorSeven <= 260000) {
-                tpm = YES;
-            }
-            if (dungeons.masterFive && dungeons.masterFive <= 165000) {
+        if (!(tpp === YES || tp === YES)) {
+            if (VerificationManager.meetsTopMinusReqs(verifyDungeonData)) {
                 tpm = YES;
             }
         }
 
-        if (dungeons.masterSix) {
-            if (dungeons.masterSix <= 170000) {
-                speedrunner = YES;
-            }
+        if (VerificationManager.meetsSpeedrunnerReqs(verifyDungeonData)) {
+            speedrunner = YES;
         }
 
         if (tpp === YES) tp = YES;
