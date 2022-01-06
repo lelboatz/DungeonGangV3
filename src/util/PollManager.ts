@@ -5,7 +5,7 @@ import {
     GuildMember,
     Message,
     MessageActionRow,
-    MessageButton,
+    MessageButton, MessageEmbed,
     Snowflake,
     TextChannel
 } from "discord.js";
@@ -238,64 +238,7 @@ class PollManager {
             try {
                 await message.edit({
                     embeds: [
-                        {
-                            "color": "#B5FF59",
-                            "footer": {
-                                "icon_url": this.client.user?.avatarURL()?.toString(),
-                                "text": "Dungeon Gang Polls"
-                            },
-                            "thumbnail": {
-                                "url": this.client.user?.avatarURL()?.toString()
-                            },
-                            "author": {
-                                "name": "➤ " + poll.username + (poll.identifier ? ` (${poll.identifier})` : ""),
-                                "icon_url": `https://crafatar.com/avatars/${poll.uuid}?overlay`,
-                                "url": "https://sky.shiiyu.moe/stats/" + poll.username
-                            },
-                            timestamp: new Date(),
-                            "fields": [
-                                {
-                                    "name": "**Catacombs Level**",
-                                    "value": poll.stats.cataLevel.toFixed(2),
-                                    "inline": true
-                                },
-                                {
-                                    "name": "**Master 6 S+ PB**",
-                                    "value": poll.stats.masterSix ? fmtMSS(poll.stats.masterSix) : "N/A",
-                                    "inline": true
-                                },
-                                {
-                                    "name": "**Master 6 Completions**",
-                                    "value": poll.stats.masterSixCompletions.toString(),
-                                    "inline": true
-                                },
-                                {
-                                    "name": "**Secrets**",
-                                    "value": poll.stats.secrets.toString(),
-                                    "inline": true
-                                },
-                                {
-                                    "name": "**Blood Mob Kills**",
-                                    "value": poll.stats.bloodMobs.toString(),
-                                    "inline": true
-                                },
-                                {
-                                    "name": `${poll.votes.positive.length} :thumbsup: ${poll.votes.neutral.length} :zipper_mouth: ${poll.votes.negative.length} :thumbsdown:`,
-                                    "value": "Please be honest when voting, these polls are held to measure someone's skill. Not their popularity or personalities",
-                                    "inline": false
-                                },
-                                {
-                                    "name": "**Anonymous**",
-                                    "value": "True",
-                                    "inline": true
-                                },
-                                {
-                                    "name": "**Poll Ended**",
-                                    "value": `<t:${Math.floor(new Date().getTime() / 1000)}:R>`,
-                                    "inline": true
-                                }
-                            ]
-                        }
+                        this.pollEndedEmbed(poll)
                     ],
                     components: [
                         new MessageActionRow()
@@ -479,7 +422,7 @@ class PollManager {
         return this.client.mongo.updateVotes(poll._id, votes);
     }
 
-    pollEndedEmbed(poll: MongoPoll) {
+    pollInProgressEmbed(poll: MongoPoll) {
         return {
             "color": "#B5FF59",
             "footer": {
@@ -532,12 +475,68 @@ class PollManager {
                     "inline": true
                 },
                 {
-                    "name": "**Poll Ended**",
+                    "name": "**Poll End Time**",
                     "value": `<t:${Math.floor(poll.endDate)}:R>`,
                     "inline": true
                 }
             ]
-        }
+        } as unknown as MessageEmbed
+    }
+
+    pollEndedEmbed(poll: MongoPoll) {
+        return {
+            "color": "#B5FF59",
+            "footer": {
+                "icon_url": this.client.user?.avatarURL()?.toString(),
+                "text": "Dungeon Gang Polls"
+            },
+            "thumbnail": {
+                "url": this.client.user?.avatarURL()?.toString()
+            },
+            "author": {
+                "name": "➤ " + poll.username + (poll.identifier ? ` (${poll.identifier})` : ""),
+                "icon_url": `https://crafatar.com/avatars/${poll.uuid}?overlay`,
+                "url": "https://sky.shiiyu.moe/stats/" + poll.username
+            },
+            timestamp: new Date(),
+            "fields": [
+                {
+                    "name": "**Catacombs Level**",
+                    "value": poll.stats.cataLevel.toFixed(2),
+                    "inline": true
+                },
+                {
+                    "name": "**Master 6 S+ PB**",
+                    "value": poll.stats.masterSix ? fmtMSS(poll.stats.masterSix) : "N/A",
+                    "inline": true
+                },
+                {
+                    "name": "**Master 6 Completions**",
+                    "value": poll.stats.masterSixCompletions.toString(),
+                    "inline": true
+                },
+                {
+                    "name": "**Secrets**",
+                    "value": poll.stats.secrets.toString(),
+                    "inline": true
+                },
+                {
+                    "name": "**Blood Mob Kills**",
+                    "value": poll.stats.bloodMobs.toString(),
+                    "inline": true
+                },
+                {
+                    "name": `**Results**`,
+                    "value": `${poll.votes.positive.length} :thumbsup: ${poll.votes.neutral.length} :zipper_mouth: ${poll.votes.negative.length} :thumbsdown:`,
+                    "inline": true
+                },
+                {
+                    "name": "**Poll Ended**",
+                    "value": `<t:${Math.floor(new Date().getTime() / 1000)}:R>`,
+                    "inline": true
+                }
+            ]
+        } as unknown as MessageEmbed
     }
 
 }

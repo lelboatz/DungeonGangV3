@@ -32,7 +32,7 @@ module.exports = class ViewPollCommand extends BaseCommand {
 
         const identifier = interaction.options.getString("identifier", true);
 
-        const poll = await this.mongo.getPollByIdentifier(identifier)
+        const poll = await this.mongo.getPollByIdentifier(identifier) as unknown as MongoPoll;
 
         if (!poll) {
             return interaction.editReply({
@@ -41,9 +41,26 @@ module.exports = class ViewPollCommand extends BaseCommand {
                 ]
             })
         }
+
+        if (poll.active) {
+            if (interaction.user.permLevel < 1) {
+                return interaction.editReply({
+                    embeds: [
+                        errorEmbed(`You do not have permission to view this poll.`)
+                    ]
+                })
+            } else {
+                return interaction.editReply({
+                    embeds: [
+                        PollManager.pollInProgressEmbed(poll)
+                    ]
+                })
+            }
+        }
+
         return interaction.editReply({
             embeds: [
-                PollManager.pollEndedEmbed(poll as unknown as MongoPoll) as unknown as MessageEmbed
+                PollManager.pollEndedEmbed(poll)
             ]
         })
     }

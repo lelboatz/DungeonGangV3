@@ -211,6 +211,9 @@ function highestCataProfileOld(profiles: Components.Schemas.SkyBlockProfileCuteN
                 }
             }
         }
+        if (highestCataXp === 0) {
+            return highestCataProfile(profiles, uuid);
+        }
         return highestProfile;
     } catch (error) {
         return undefined;

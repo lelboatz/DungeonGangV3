@@ -2,7 +2,17 @@ import BaseCommand from "../BaseCommand";
 import { DungeonGang } from "../../index";
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { CommandInteraction, MessageEmbed } from "discord.js";
-import { cataLevel, ephemeralMessage, errorEmbed, fmtMSS, getMojang, highestCataProfile, cataXp as cataLevels } from "../../util/Functions";
+import {
+    cataLevel,
+    ephemeralMessage,
+    errorEmbed,
+    fmtMSS,
+    getMojang,
+    highestCataProfile,
+    cataXp as cataLevels,
+    getProfileByName
+} from "../../util/Functions";
+import { MongoUser } from "../../util/Mongo";
 
 module.exports = class CataCommand extends BaseCommand {
     constructor(client: DungeonGang) {
@@ -21,6 +31,11 @@ module.exports = class CataCommand extends BaseCommand {
                     .setDescription("The minecraft username of the user.")
                     .setRequired(true)
                 )
+                .addStringOption(option => option
+                    .setName("profile")
+                    .setDescription("The skyblock profile of the user.")
+                    .setRequired(false)
+                )
         })
     }
     async execute(interaction: CommandInteraction) {
@@ -29,6 +44,7 @@ module.exports = class CataCommand extends BaseCommand {
         })
 
         const username = interaction.options.getString("username", true)
+        const sbProfile = interaction.options.getString("profile", false)
         const mojang = await getMojang(username)
 
         if (mojang === "error" || !mojang) {
@@ -43,7 +59,11 @@ module.exports = class CataCommand extends BaseCommand {
         let profile;
         try {
             player = await this.hypixel.player.uuid(mojang.id);
-            profile = highestCataProfile(await this.hypixel.skyblock.profiles.uuid(mojang.id), mojang.id)
+            if (sbProfile) {
+                profile = getProfileByName(await this.hypixel.skyblock.profiles.uuid(mojang.id), sbProfile)
+            } else {
+                profile = highestCataProfile(await this.hypixel.skyblock.profiles.uuid(mojang.id), mojang.id)
+            }
         } catch (error: any) {
             if (error.message === 'Key "profiles" is not an array.' && player) {
                 profile = undefined
@@ -55,6 +75,14 @@ module.exports = class CataCommand extends BaseCommand {
                     ],
                 });
             }
+        }
+
+        if (sbProfile && !profile) {
+            return interaction.editReply({
+                embeds: [
+                    errorEmbed(`Could not find profile \`${this.toProperCase(sbProfile)}\` for user \`${mojang.name}\`.`)
+                ]
+            })
         }
 
         let dungeons;
@@ -90,10 +118,23 @@ module.exports = class CataCommand extends BaseCommand {
                 masterSixCompletions: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs?.tier_completions?.[6] ?? 0
             }
         }
-        let YES = "<:yes:838801988241588304>", NO = "<:no:838802013541498890>"
+        let YES = "<:yes:838801988241588304>", NO = "<:no:838802013541498890>", NEUTRAL = "<:neutral:928452064286216222>"
 
 
-        let tpm = NO, tp = NO, tpp = NO, speedrunner = NO, votedOut = NO, secretDuper = NO;
+        let tpm = NO, tp = NO, tpp = NO, speedrunner = NO, votedIn = false, votedOut = NEUTRAL, secretDuper = NO;
+
+        const user = await this.mongo.getUser(mojang.id) as unknown as MongoUser;
+
+        if (user) {
+            if (user.votedOut) {
+                votedOut = YES
+            } else {
+                votedOut = NO
+            }
+            if (user.votedIn) {
+                votedIn = true;
+            }
+        }
 
         if (dungeons.secrets >= 100000) {
             secretDuper = YES;
@@ -101,9 +142,16 @@ module.exports = class CataCommand extends BaseCommand {
 
         if ((dungeons.secrets >= 50000 || dungeons.bloodMobs >= 45000) && dungeons.cataLevel >= 48 && dungeons.masterSix) {
             if (dungeons.masterSix <= 195000) {
-                tpp = YES;
-                tp = YES;
+                if (votedOut !== YES) {
+                    tpp = YES;
+                    tp = YES;
+                }
             }
+        }
+
+        if (votedIn) {
+            tpp = YES;
+            tp = YES;
         }
 
         if ((tpp === NO) && dungeons.cataLevel >= 45 && dungeons.secrets >= 30000 && (dungeons.floorSeven || dungeons.masterFive || dungeons.masterSix)) {
@@ -159,9 +207,9 @@ module.exports = class CataCommand extends BaseCommand {
                     .addField("ㅤ",
                         `<@&${this.client.config.discord.roles.misc.speedRunner}> ${speedrunner}\n` +
                         `<@&${this.client.config.discord.roles.misc.secretDuper}> ${secretDuper}\n` +
-                        `<@&${this.client.config.discord.roles.topPlayer.votedOut}> ${NO}`, true
+                        `<@&${this.client.config.discord.roles.topPlayer.votedOut}> ${votedOut}`, true
                     )
-                    .setFooter(this.client.user?.username as string, this.client.user?.avatarURL()?.toString())
+                    .setFooter(`${this.client.user?.username}` + (profile ? ` - Profile: ${profile.cute_name}` : " - No SkyBlock Profiles"), this.client.user?.avatarURL()?.toString())
                     .setColor("#B5FF59")
             ]
         })

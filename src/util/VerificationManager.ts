@@ -308,11 +308,19 @@ class VerificationManager {
             if (user) {
                 user.votedOut = true;
             }
+        } else {
+            if (user) {
+                user.votedOut = false;
+            }
         }
 
         if (member.roles.cache.has(this.client.config.discord.roles.topPlayer.plusReq)) {
             if (user) {
                 user.votedIn = true;
+            }
+        } else {
+            if (user) {
+                user.votedIn = false;
             }
         }
 
