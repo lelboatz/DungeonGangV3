@@ -105,7 +105,7 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
                     break;
                 }
                 case VerifyErrors.HYPIXEL_DISCORD_MISMATCH: {
-                    embed = errorEmbed(`The minecraft account \`${response.mojang!.name}\` is linked to a different discord account on Hypixel. \n\nTheir Tag: ${interaction.user.tag}\nHypixel Tag: ${response.tag}\n\nSet bypass_discord to true to bypass Discord verification.`);
+                    embed = errorEmbed(`The minecraft account \`${response.mojang!.name}\` is linked to a different discord account on Hypixel. \n\nTheir Tag: ${member.user.tag}\nHypixel Tag: ${response.tag}\n\nSet bypass_discord to true to bypass Discord verification.`);
                     break;
                 }
                 case VerifyErrors.MONGO_DISCORD_MISMATCH: {
