@@ -48,7 +48,7 @@ module.exports = class {
             const level = this.client.getPermissionLevel(interaction.member as GuildMember | null);
             if (level < cmd.conf.permLevel)
                 return interaction.reply({
-                    content: "You don't have permission to use this command + cry about it + stay mad + get real + L + mald seethe cope harder + hoes mad + basic + skill issue + ratio + you fell off + the audacity + triggered + any askers + redpilled + get a life + ok and? + cringe + touch grass + donowalled + not based + your're (french) + not funny didn't laugh + you're + grammar issue + go outside + get good + reported + ad hominem + GG! + ur mom",
+                    content: "You don't have permission to use this command.",
                     ephemeral: true
                 });
             interaction.user.permLevel = level;
