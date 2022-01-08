@@ -49,12 +49,7 @@ module.exports = class UnverifyCommand extends BaseCommand {
             });
         }
 
-        let users = await this.mongo.getUsersByDiscord(member.id) as MongoUser[] | undefined;
-
-        users?.forEach(async (user) => {
-            user.discordId = undefined;
-            await this.mongo.updateUser(user);
-        });
+        await this.mongo.nullUsersByDiscord(user.id);
 
         await member.edit({
             roles: this.client.config.discord.roles.fixRoles,

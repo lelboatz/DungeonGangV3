@@ -36,6 +36,10 @@ async function getMojangFromUuid(uuid: string): Promise<MojangResponse | "error"
                 id: mojang.data.id,
                 name: mojang.data.name
             });
+            mojangCache.set(mojang.data.name, {
+                id: mojang.data.id,
+                name: mojang.data.name
+            });
         }
         return {
             id: mojang.data.id,

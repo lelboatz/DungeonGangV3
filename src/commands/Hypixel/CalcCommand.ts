@@ -1,16 +1,17 @@
 import BaseCommand from "../BaseCommand";
 import { DungeonGang } from "../../index";
-import { SlashCommandBuilder } from "@discordjs/builders";
-import { CommandInteraction } from "discord.js";
+import { ContextMenuCommandBuilder, SlashCommandBuilder } from "@discordjs/builders";
+import { CommandInteraction, GuildMember, MessageContextMenuInteraction, UserContextMenuInteraction } from "discord.js";
 import {
     cataExp,
     cataLevel,
-    cataXp,
     ephemeralMessage,
     errorEmbed,
     getMojang,
+    getMojangFromUuid,
     highestCataProfile
 } from "../../util/Functions";
+import { ApplicationCommandType } from "discord-api-types";
 
 module.exports = class CalcCommand extends BaseCommand {
     constructor(client: DungeonGang) {
@@ -34,15 +35,96 @@ module.exports = class CalcCommand extends BaseCommand {
                     .setRequired(true)
                     .setDescription("The level or player you want to end at.")
                 )
+                .addStringOption(option => option
+                    .setName("class")
+                    .setDescription("The class that you would like to calculate xp for.")
+                    .addChoices([["Mage", "mage"], ["Archer", "archer"], ["Berserk", "berserk"], ["Tank", "tank"], ["Healer", "healer"]])
+                ),
+            messageContextMenuCommandBody: new ContextMenuCommandBuilder()
+                .setName("Exp Calculator")
+                .setType(ApplicationCommandType.Message),
+            userContextMenuCommandBody: new ContextMenuCommandBuilder()
+                .setName("Exp Calculator")
+                .setType(ApplicationCommandType.User),
         })
     }
-    async execute(interaction: CommandInteraction) {
+    async execute(interaction: CommandInteraction | UserContextMenuInteraction | MessageContextMenuInteraction) {
         await interaction.deferReply({
             ephemeral: ephemeralMessage(interaction.channelId)
         })
 
-        const startLevelOrPlayer = interaction.options.getString("start_level_or_player", true);
-        const endLevelOrPlayer = interaction.options.getString("end_level_or_player", true);
+        let startLevelOrPlayer;
+        let endLevelOrPlayer;
+        let className;
+
+        if (interaction.isCommand()) {
+            startLevelOrPlayer = interaction.options.getString("start_level_or_player", true);
+            endLevelOrPlayer = interaction.options.getString("end_level_or_player", true);
+            className = interaction.options.getString("class", false);
+        } else {
+            let startMember = interaction.member as GuildMember
+            const startMongoUser = await this.mongo.getUserByDiscord(startMember.user.id)
+            if (!startMongoUser) {
+                try {
+                    startLevelOrPlayer = startMember.displayName.split(" ")[1].replace(/\W/g, '')
+                } catch {
+                    return interaction.editReply({
+                        embeds: [
+                            errorEmbed(`Failed to get username for ${startMember.toString()} from nickname. This user is also not in the database.`)
+                        ]
+                    })
+                }
+            } else {
+                let mojang = await getMojangFromUuid(startMongoUser.uuid)
+                if (mojang === "error" || !mojang) {
+                    return interaction.editReply({
+                        embeds: [
+                            errorEmbed(`Unable to get Mojang data for ${startMember.toString()} from the database or nickname.`)
+                        ]
+                    })
+                }
+                startLevelOrPlayer = mojang.name
+            }
+
+            let endMember = await this.getMemberFromContextMenuInteraction(interaction)
+            if (!endMember) {
+                return interaction.editReply({
+                    embeds: [
+                        errorEmbed(`That user is not in this server.`)
+                    ]
+                })
+            }
+            if (endMember.user.bot) {
+                return interaction.editReply({
+                    embeds: [
+                        errorEmbed(`You cannot use this on bots!`)
+                    ]
+                })
+            }
+
+            const endMongoUser = await this.mongo.getUserByDiscord(endMember.user.id)
+            if (!endMongoUser) {
+                try {
+                    endLevelOrPlayer = endMember.displayName.split(" ")[1].replace(/\W/g, '')
+                } catch {
+                    return interaction.editReply({
+                        embeds: [
+                            errorEmbed(`Failed to get username for ${endMember.toString()} from nickname. This user is also not in the database.`)
+                        ]
+                    })
+                }
+            } else {
+                let mojang = await getMojangFromUuid(endMongoUser.uuid)
+                if (mojang === "error" || !mojang) {
+                    return interaction.editReply({
+                        embeds: [
+                            errorEmbed(`Unable to get Mojang data for ${endMember.toString()} from the database or nickname.`)
+                        ]
+                    })
+                }
+                endLevelOrPlayer = mojang.name
+            }
+        }
 
         let start, end;
 
@@ -97,7 +179,11 @@ module.exports = class CalcCommand extends BaseCommand {
             if (!profile) {
                 start = 0;
             } else {
-                start = profile.members[mojang.id].dungeons?.dungeon_types.catacombs.experience ?? 0
+                if (className) {
+                    start = profile.members[mojang.id].dungeons?.player_classes[className].experience ?? 0
+                } else {
+                    start = profile.members[mojang.id].dungeons?.dungeon_types.catacombs.experience ?? 0
+                }
             }
         }
 
@@ -132,7 +218,11 @@ module.exports = class CalcCommand extends BaseCommand {
             if (!profile) {
                 end = 0;
             } else {
-                end = profile.members[mojang.id].dungeons?.dungeon_types.catacombs.experience ?? 0
+                if (className) {
+                    end = profile.members[mojang.id].dungeons?.player_classes[className].experience ?? 0
+                } else {
+                    end = profile.members[mojang.id].dungeons?.dungeon_types.catacombs.experience ?? 0
+                }
             }
         }
 
@@ -157,7 +247,7 @@ module.exports = class CalcCommand extends BaseCommand {
                     fields: [
                         {
                             name: "Required Experience",
-                            value: `**${this.formatter.format(requiredExp)}** catacombs experience required to go from ${startUsername ? (`${startUsername} (level **${startLevel.toFixed(2)}**)`) : (`level **${startLevel.toFixed(2)}**`)} to ${endUsername ? (`${endUsername} (level **${endLevel.toFixed(2)})**`) : (`level **${endLevel.toFixed(2)}**`)}.`,
+                            value: `**${this.formatter.format(requiredExp)}** ${(className ?? "catacombs")} experience required to go from ${startUsername ? (`${startUsername} (level **${startLevel.toFixed(2)}**)`) : (`level **${startLevel.toFixed(2)}**`)} to ${endUsername ? (`${endUsername} (level **${endLevel.toFixed(2)})**`) : (`level **${endLevel.toFixed(2)}**`)}.`,
                             inline: true
                         }
                     ]

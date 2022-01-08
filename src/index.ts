@@ -67,6 +67,12 @@ export class DungeonGang extends Client {
             this.commands.set(props.help.name, props);
             console.log(`Loading Global Command: ${props.help.name}. 👌`)
             this.slashCommands.push(props.conf.slashCommandBody.toJSON())
+            if (props.conf.messageContextMenuCommandBody) {
+                this.slashCommands.push(props.conf.messageContextMenuCommandBody.toJSON())
+            }
+            if (props.conf.userContextMenuCommandBody) {
+                this.slashCommands.push(props.conf.userContextMenuCommandBody.toJSON())
+            }
             return false;
         } catch (e) {
             return `Unable to load command ${commandName}: ${e}`;

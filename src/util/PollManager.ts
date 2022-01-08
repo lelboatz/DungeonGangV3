@@ -1,11 +1,11 @@
 import { client, DungeonGang } from "../index";
-import { cataLevel, errorEmbed, fmtMSS, getMojang, highestCataProfile } from "./Functions";
+import { cataLevel, errorEmbed, fmtMSS, getMojang, highestCataProfile, highestCataProfileOld } from "./Functions";
 import {
     ButtonInteraction,
     GuildMember,
     Message,
     MessageActionRow,
-    MessageButton, MessageEmbed,
+    MessageButton, MessageEmbed, MessageSelectMenu, SelectMenuInteraction,
     Snowflake,
     TextChannel
 } from "discord.js";
@@ -61,7 +61,7 @@ class PollManager {
             }
         }
 
-        let profile = highestCataProfile(profiles, mojang.id);
+        let profile = highestCataProfileOld(profiles, mojang.id);
 
         let stats;
 
@@ -532,11 +532,60 @@ class PollManager {
                 },
                 {
                     "name": "**Poll Ended**",
-                    "value": `<t:${Math.floor(new Date().getTime() / 1000)}:R>`,
+                    "value": `<t:${Math.floor(poll.endDate)}:R>`,
                     "inline": true
                 }
             ]
         } as unknown as MessageEmbed
+    }
+
+    async onSelect(interaction: SelectMenuInteraction) {
+        const userId = interaction.customId.split("_")[3]
+        if (interaction.user.id !== userId) {
+            return interaction.reply({
+                content: "You cannot use this menu",
+                ephemeral: true
+            })
+        }
+        const poll = await this.client.mongo.getPoll(interaction.values[0]);
+        if (!poll) {
+            return interaction.reply({
+                content: "Poll not found",
+                ephemeral: true
+            })
+        }
+
+        const message = interaction.message as Message
+        const menu = message.components[0].components[0] as MessageSelectMenu
+
+        const options = menu.options.map(option => {
+            if (option.value === interaction.values[0]) {
+                return {
+                    label: option.label,
+                    value: option.value,
+                    default: true,
+                    emoji: "📊"
+                }
+            }
+            return {
+                label: option.label,
+                value: option.value,
+                emoji: "📊"
+            }
+        })
+        menu.setOptions(options)
+
+        return interaction.update({
+            embeds: [
+                this.pollEndedEmbed(poll)
+            ],
+            components: [
+                new MessageActionRow()
+                    .addComponents([
+                        menu
+                    ])
+            ]
+        })
     }
 
 }

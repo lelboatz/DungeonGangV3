@@ -1,18 +1,16 @@
 import BaseCommand from "../BaseCommand";
 import { client, DungeonGang } from "../../index";
-import { SlashCommandBuilder } from "@discordjs/builders";
-import { CommandInteraction, GuildMemberRoleManager, MessageEmbed } from "discord.js";
+import { ContextMenuCommandBuilder, SlashCommandBuilder } from "@discordjs/builders";
 import {
-    cataLevel as convertXp, ephemeralMessage,
-    errorEmbed, fmtMSS,
-    getMojang,
-    getMojangFromUuid,
-    highestCataProfile
-} from "../../util/Functions";
+    CommandInteraction,
+    MessageContextMenuInteraction,
+    MessageEmbed,
+    UserContextMenuInteraction
+} from "discord.js";
+import { ephemeralMessage, errorEmbed, fmtMSS, getMojang, getMojangFromUuid } from "../../util/Functions";
 import { MongoUser } from "../../util/Mongo";
-import { userSchema } from "../../util/Schema";
-import EmojiManager from "../../util/EmojiManager";
 import VerificationManager, { VerifyErrors } from "../../util/VerificationManager";
+import { ApplicationCommandType } from "discord-api-types";
 
 module.exports = class ForceUpdateCommand extends BaseCommand {
     constructor(client: DungeonGang) {
@@ -30,23 +28,36 @@ module.exports = class ForceUpdateCommand extends BaseCommand {
                     .setName("user")
                     .setRequired(true)
                     .setDescription("The user to force update.")
-                )
+                ),
+            messageContextMenuCommandBody: new ContextMenuCommandBuilder()
+                .setName("Force Update")
+                .setType(ApplicationCommandType.Message),
+            userContextMenuCommandBody: new ContextMenuCommandBuilder()
+                .setName("Force Update")
+                .setType(ApplicationCommandType.User)
         });
     }
-    async execute(interaction: CommandInteraction) {
+    async execute(interaction: CommandInteraction | MessageContextMenuInteraction | UserContextMenuInteraction) {
         await interaction.deferReply({
             ephemeral: ephemeralMessage(interaction.channelId)
         })
-        const user = interaction.options.getUser("user", true);
 
-        const member = await this.fetchMember(user.id, interaction.guild!)
+        let member;
+
+        if (interaction.isCommand()) {
+            const user = interaction.options.getUser("user", true);
+            member = await this.fetchMember(user.id, interaction.guild!)
+        } else {
+            member = await this.getMemberFromContextMenuInteraction(interaction);
+        }
+
         if (!member) {
             return interaction.editReply({
                 embeds: [errorEmbed("That user is not in this server.")]
             });
         }
 
-        let mongoUser = await this.client.mongo.getUserByDiscord(user.id) as MongoUser | undefined;
+        let mongoUser = await this.client.mongo.getUserByDiscord(member.user.id) as MongoUser | undefined;
 
         let mojang;
 

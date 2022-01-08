@@ -1,7 +1,13 @@
 import BaseCommand from "../BaseCommand";
 import { DungeonGang } from "../../index";
-import { SlashCommandBuilder } from "@discordjs/builders";
-import { CommandInteraction, MessageEmbed } from "discord.js";
+import { ContextMenuCommandBuilder, SlashCommandBuilder } from "@discordjs/builders";
+import { ApplicationCommandType } from "discord-api-types"
+import {
+    CommandInteraction, GuildMember,
+    MessageContextMenuInteraction,
+    MessageEmbed,
+    UserContextMenuInteraction
+} from "discord.js";
 import {
     cataLevel,
     ephemeralMessage,
@@ -10,7 +16,7 @@ import {
     getMojang,
     highestCataProfile,
     cataXp as cataLevels,
-    getProfileByName
+    getProfileByName, getMojangFromUuid
 } from "../../util/Functions";
 import { MongoUser } from "../../util/Mongo";
 import VerificationManager from "../../util/VerificationManager";
@@ -36,16 +42,65 @@ module.exports = class CataCommand extends BaseCommand {
                     .setName("profile")
                     .setDescription("The skyblock profile of the user.")
                     .setRequired(false)
-                )
+                ),
+            messageContextMenuCommandBody: new ContextMenuCommandBuilder()
+                .setName("Dungeon Stats")
+                .setType(ApplicationCommandType.Message),
+            userContextMenuCommandBody: new ContextMenuCommandBuilder()
+                .setName("Dungeon Stats")
+                .setType(ApplicationCommandType.User)
         })
     }
-    async execute(interaction: CommandInteraction) {
+    async execute(interaction: CommandInteraction | MessageContextMenuInteraction | UserContextMenuInteraction) {
         await interaction.deferReply({
             ephemeral: ephemeralMessage(interaction.channelId)
         })
 
-        const username = interaction.options.getString("username", true)
-        const sbProfile = interaction.options.getString("profile", false)
+        let username, sbProfile;
+
+        if (interaction.isCommand()) {
+            username = interaction.options.getString("username", true)
+            sbProfile = interaction.options.getString("profile", false)
+        } else {
+            let member = await this.getMemberFromContextMenuInteraction(interaction)
+            if (!member) {
+                return interaction.editReply({
+                    embeds: [
+                        errorEmbed(`That user is not in this server.`)
+                    ]
+                })
+            }
+            if (member.user.bot) {
+                return interaction.editReply({
+                    embeds: [
+                        errorEmbed(`You cannot use this on bots!`)
+                    ]
+                })
+            }
+            const mongoUser = await this.mongo.getUserByDiscord(member.user.id)
+            if (!mongoUser) {
+                try {
+                    username = member.displayName.split(" ")[1].replace(/\W/g, '')
+                } catch {
+                    return interaction.editReply({
+                        embeds: [
+                            errorEmbed(`Failed to get username for ${member.toString()} from nickname. This user is also not in the database.`)
+                        ]
+                    })
+                }
+            } else {
+                let mojang = await getMojangFromUuid(mongoUser.uuid)
+                if (mojang === "error" || !mojang) {
+                    return interaction.editReply({
+                        embeds: [
+                            errorEmbed(`Could not find that user`)
+                        ]
+                    })
+                }
+                username = mojang.name
+            }
+        }
+
         const mojang = await getMojang(username)
 
         if (mojang === "error" || !mojang) {

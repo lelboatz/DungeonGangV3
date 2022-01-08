@@ -87,6 +87,10 @@ export default class MongoUtils {
         return this.mongo?.collection("newUsers").find({ discordId: id }).toArray()
     }
 
+    nullUsersByDiscord(id: Snowflake) {
+        return this.mongo?.collection("newUsers").updateMany({ discordId: id }, { $set: { discordId: null } })
+    }
+
     updateUserByDiscord(user: MongoUser) {
         return this.mongo?.collection("newUsers").replaceOne({ discordId: user.discordId }, user)
     }
@@ -107,6 +111,10 @@ export default class MongoUtils {
 
     getPolls(uuid: string) {
         return this.mongo?.collection("polls").find({ uuid: uuid }).toArray()
+    }
+
+    get25Polls(uuid: string) {
+        return this.mongo?.collection("polls").find({ uuid: uuid, active: false }).limit(25).toArray()
     }
 
     getActivePolls(): Promise<MongoPoll[] | undefined> | undefined {
