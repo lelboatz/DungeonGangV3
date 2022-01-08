@@ -169,7 +169,7 @@ module.exports = class ScanCommand extends BaseCommand {
                     if (--i) loop(i);
                 }
                 if (--i) loop(i);
-            }, 750)
+            }, 4000)
         }
         (loop)(members.size)
     }
