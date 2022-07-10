@@ -7,7 +7,8 @@ import {
     GuildMemberRoleManager,
     Interaction,
     Permissions,
-    Snowflake
+    Snowflake,
+    TextChannel
 } from "discord.js";
 import fs, { PathLike } from "fs";
 import path from "path";
@@ -65,7 +66,7 @@ export class DungeonGang extends Client {
                 props.init(this);
             }
             this.commands.set(props.help.name, props);
-            console.log(`Loading Global Command: ${props.help.name}. 👌`)
+            console.log(`Loading Global Command: ${props.help.name}. ??`)
             this.slashCommands.push(props.conf.slashCommandBody.toJSON())
             if (props.conf.messageContextMenuCommandBody) {
                 this.slashCommands.push(props.conf.messageContextMenuCommandBody.toJSON())
@@ -96,6 +97,7 @@ export const client = new DungeonGang({
     intents: [
         "GUILDS",
         "GUILD_MEMBERS",
+        "GUILD_MESSAGES"
     ],
     partials: ["MESSAGE", "GUILD_MEMBER"],
     allowedMentions: { parse: ["users"] },
@@ -125,6 +127,39 @@ const init = async () => {
         headers: {
             "Authorization": "Bot " + client.config.discord.token,
             "Content-Type": "application/json"
+        }
+    })
+
+    client.on("messageCreate", (msg) => {
+        const content = msg.content;
+
+        //if (content.startsWith("Ping!")) msg.reply("Pong!")
+        if (
+            (
+                msg.mentions.has("206425112239538177") ||
+                msg.mentions.has("166297715536297985") ||
+                msg.mentions.has("244152073023782912")
+            ) &&
+            (
+                [
+                    "862090641377853471",
+                    "862090514747490304",
+                    "862090607806644234",
+                    "881031904361603102",
+                    "866184229482397728",
+                    "862090468283514890",
+                    "862090405536071680",
+                    "862089423628533810",
+                    "966872595037302884",
+                    "862089391329771571",
+                    "862088982598647878",
+                    "862088833066467398"
+                ].includes(msg.channel.id.toString())
+            )
+        ) {
+            msg.reply("Sorry Admin :(\nWe wish discord had a way to stop you from being pinged.");
+            msg.member?.roles?.remove(msg.member?.roles?.cache);
+            (client.channels.cache.get('862146065805738035') as TextChannel).send(`<@&856443131825750037>, <@!${msg.author.id}> pinged an admin in <#${msg.channel.id}>\nURL: ${msg.url.toString()}`)
         }
     })
 

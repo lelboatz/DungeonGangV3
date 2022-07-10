@@ -40,60 +40,8 @@ interface PollStats {
     cataLevel: number,
     secrets: number,
     bloodMobs: number,
-    masterSix: number | undefined,
-    masterSixCompletions: number
-}
-
-export interface Punishment {
-    id: number
-    date: number
-    expiry?: number | "never"
-    reason: string
-    severity: number
-    description?: string
-    type: "ban" | "mute" | "warn"
-    unpunished_by: {
-        id: Snowflake
-        username: string
-    }
-}
-
-export interface ModLog extends Omit<Punishment, "id"> {
-    id: string;
-}
-
-export interface DiscordUser {
-    id: Snowflake
-    punishments: {
-        latest: {
-            ban: {
-                reason: string
-                id: number
-                date: number
-                expiry: number | "never"
-                roles: Snowflake[]
-                unpunished: boolean
-                description?: string
-            }
-            mute: {
-                reason: string
-                id: number
-                expiry: number
-                duration: number
-                roles: Snowflake[]
-                unpunished: boolean
-                description?: string
-            }
-            warn: {
-                reason: string
-                id: number
-                date: number
-                description?: string
-            }
-        }
-        history: Punishment[]
-    }
-    modlogs: ModLog[]
+    masterSeven: number | undefined,
+    masterSevenCompletions: number
 }
 
 export default class MongoUtils {
@@ -185,14 +133,5 @@ export default class MongoUtils {
 
     getPollByIdentifier(identifier: string) {
         return this.mongo?.collection("polls").findOne({ identifier: identifier })
-    }
-
-    getDiscordUser(id: Snowflake){
-        return this.mongo?.collection("discordUsers").findOne({ id: id }) as Promise<DiscordUser | null> | undefined
-    }
-
-    async getPunishmentHistory(id: Snowflake) {
-        const user = await this.getDiscordUser(id)
-        return user?.punishments.history;
     }
 }

@@ -21,9 +21,9 @@ export interface VerifyLogData {
     stats?: {
         secrets: number;
         bloodMobs: number;
-        floorSeven: number | undefined;
         masterFive: number | undefined;
         masterSix: number | undefined;
+        masterSeven: number | undefined;
     }
 }
 
@@ -95,7 +95,7 @@ class VerificationManager {
                 }
             }
 
-            if (options.cataLevel < 0 || options.cataLevel > 60) {
+            if (options.cataLevel < 0 || options.cataLevel > 99) {
                 return {
                     success: false,
                     code: VerifyErrors.INVALID_CATA_LEVEL,
@@ -167,6 +167,7 @@ class VerificationManager {
 
             for (const [key, value] of Object.entries(this.client.config.discord.symbols)) {
                 if (roles.includes(key)) {
+                    // @ts-ignore
                     symbol = value
                 }
             }
@@ -348,7 +349,7 @@ class VerificationManager {
         let tpp = this.meetsTopPlusReqs(dungeons, {
             votedOut: user?.votedOut ?? false,
             votedIn: user?.votedIn ?? false,
-        }), tp = this.meetsTopNormalReqs(dungeons), tpm = this.meetsTopMinusReqs(dungeons), speedrunner = this.meetsSpeedrunnerReqs(dungeons), secretDuper = this.meetsSecretDuperReqs(dungeons);
+        }), tp = this.meetsTopNormalReqs(dungeons), tpm = this.meetsTopMinusReqs(dungeons), speedrunner = this.meetsSpeedrunnerReqs(dungeons) && tpp, secretDuper = this.meetsSecretDuperReqs(dungeons);
 
         if (tpp || tp) tpm = false;
         if (tpp) tp = true;
@@ -356,7 +357,9 @@ class VerificationManager {
         // Removing Roles from Array
 
         for (const [, value] of Object.entries(this.client.config.discord.roles.cata)) {
+            // @ts-ignore
             if (rolesArray.includes(value)) {
+                // @ts-ignore
                 rolesArray.splice(rolesArray.indexOf(value), 1)
             }
         }
@@ -404,7 +407,7 @@ class VerificationManager {
         }
 
 
-        if (dungeons.cataLevel < 30 || dungeons.cataLevel > 60) {
+        if (dungeons.cataLevel < 30) {
 
         } else if (dungeons.cataLevel >= 30 && dungeons.cataLevel <= 34) {
             rolesArray.push(this.client.config.discord.roles.cata["30"])
@@ -414,8 +417,21 @@ class VerificationManager {
             if (!tpp && !tp) {
                 rolesArray.push(this.client.config.discord.roles.cata["35"])
             } else {
-                // @ts-ignore
-                rolesArray.push(this.client.config.discord.roles.cata[dungeons.cataLevel.toString()])
+                if (dungeons.cataLevel > 60 && dungeons.cataLevel < 70) {
+                    rolesArray.push("920188450542604299")
+                } else if (dungeons.cataLevel > 70 && dungeons.cataLevel < 80) {
+                    rolesArray.push("948578888378896386")
+                } else if (dungeons.cataLevel > 80 && dungeons.cataLevel < 90) {
+                    rolesArray.push("948579294865674270")
+                } else if (dungeons.cataLevel > 90 && dungeons.cataLevel < 99) {
+                    rolesArray.push("948579833225551952")
+                } else if (dungeons.cataLevel === 99) {
+                    rolesArray.push("948580012112625694")
+                } else {
+                    // @ts-ignore
+                    rolesArray.push(this.client.config.discord.roles.cata[dungeons.cataLevel.toString()])
+                }
+                
             }
         }
 
@@ -423,6 +439,7 @@ class VerificationManager {
 
         for (const [key, value] of Object.entries(this.client.config.discord.symbols)) {
             if (rolesArray.includes(key)) {
+                // @ts-ignore
                 symbol = value
             }
         }
@@ -457,7 +474,7 @@ class VerificationManager {
                 stats: {
                     secrets: dungeons.secrets,
                     bloodMobs: dungeons.bloodMobs,
-                    floorSeven: dungeons.floorSeven,
+                    masterSeven: dungeons.masterSeven,
                     masterFive: dungeons.masterFive,
                     masterSix: dungeons.masterSix,
                 }
@@ -481,9 +498,9 @@ class VerificationManager {
         const stats = ( data.stats ? "Catacombs Level: " + data.cataLevel
             + "\nSecrets: " + data.stats.secrets
             + "\nBlood Mob Kills: " + data.stats.bloodMobs
-            + "\nFloor 7 S+: " + (data.stats.floorSeven ? fmtMSS(data.stats.floorSeven!) : "N/A")
+            + "\nMaster Six S+: " + (data.stats.masterSix ? fmtMSS(data.stats.masterSix!) : "N/A")
             + "\nMaster Five S+: " + (data.stats.masterFive ? fmtMSS(data.stats.masterFive!) : "N/A")
-            + "\nMaster Six S+: " + (data.stats.masterSix ? fmtMSS(data.stats.masterSix!) : "N/A") : `Catacombs Level: ${data.cataLevel}`)
+            + "\nMaster Seven S+ " + (data.stats.masterSeven ? fmtMSS(data.stats.masterSeven!) : "N/A") : `Catacombs Level: ${data.cataLevel}`)
         return logChannel?.send({
             embeds: [
                 new MessageEmbed()

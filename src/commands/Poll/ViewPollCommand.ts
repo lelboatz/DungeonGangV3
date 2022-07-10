@@ -2,7 +2,7 @@ import BaseCommand from "../BaseCommand";
 import { DungeonGang } from "../../index";
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { CommandInteraction, MessageEmbed } from "discord.js";
-import { ephemeralMessage, errorEmbed } from "../../util/Functions";
+import { ephemeralMessage, errorEmbed, bypassWords, starWord } from "../../util/Functions";
 import PollManager from "../../util/PollManager";
 import { MongoPoll } from "../../util/Mongo";
 
@@ -30,11 +30,18 @@ module.exports = class ViewPollCommand extends BaseCommand {
             ephemeral: ephemeralMessage(interaction.channelId)
         })
 
-        const identifier = interaction.options.getString("identifier", true);
+        let identifier = interaction.options.getString("identifier", true);
 
         const poll = await this.mongo.getPollByIdentifier(identifier) as unknown as MongoPoll;
 
         if (!poll) {
+
+            for (let i = 0; i < bypassWords.length; i++) {
+                if (identifier.includes(bypassWords[i])) {
+                    identifier = starWord(identifier);
+                }
+            }
+
             return interaction.editReply({
                 embeds: [
                     errorEmbed(`Could not find a poll with the identifier \`${identifier}\`.`)

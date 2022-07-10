@@ -1,4 +1,4 @@
-import { GuildMember, Message, Snowflake } from "discord.js";
+import { Message, Snowflake } from "discord.js";
 import { MongoPoll, MongoUser } from "./Mongo";
 import { MojangResponse } from "./Functions";
 
@@ -37,10 +37,11 @@ function pollSchema(message: Message, mojang: MojangResponse, indentifier: strin
             cataLevel: 0,
             bloodMobs: 0,
             secrets: 0,
-            masterSix: undefined,
-            masterSixCompletions: 0,
+            masterSeven: undefined,
+            masterSevenCompletions: 0
         }
 
     }
 }
-export { userSchema, pollSchema } 
+
+export { userSchema, pollSchema }

@@ -144,9 +144,9 @@ module.exports = class ForceVerifyCommand extends BaseCommand {
             const stats = "Catacombs Level: " + response.dungeons!.cataLevel
                 + "\nSecrets: " + response.dungeons!.secrets
                 + "\nBlood Mob Kills: " + response.dungeons!.bloodMobs
-                + "\nFloor 7 S+: " + (response.dungeons!.floorSeven ? fmtMSS(response.dungeons!.floorSeven!) : "N/A")
                 + "\nMaster Five S+: " + (response.dungeons!.masterFive ? fmtMSS(response.dungeons!.masterFive!) : "N/A")
                 + "\nMaster Six S+: " + (response.dungeons!.masterSix ? fmtMSS(response.dungeons!.masterSix!) : "N/A")
+                + "\nMaster Seven S+: " + (response.dungeons!.masterSeven ? fmtMSS(response.dungeons!.masterSeven!) : "N/A")
 
             return interaction.editReply({
                 embeds: [

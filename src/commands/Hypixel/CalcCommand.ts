@@ -9,7 +9,9 @@ import {
     errorEmbed,
     getMojang,
     getMojangFromUuid,
-    highestCataProfile
+    highestCataProfile,
+    bypassWords,
+    starWord
 } from "../../util/Functions";
 import { ApplicationCommandType } from "discord-api-types";
 
@@ -131,7 +133,7 @@ module.exports = class CalcCommand extends BaseCommand {
         let startUsername, endUsername;
 
         if (!isNaN(parseFloat(startLevelOrPlayer))) {
-            if (parseFloat(startLevelOrPlayer) < 0 || parseFloat(startLevelOrPlayer) > 60) {
+            if (parseFloat(startLevelOrPlayer) < 0 || parseFloat(startLevelOrPlayer) > 99) {
                 start = startLevelOrPlayer;
             } else {
                 start = cataExp(parseFloat(startLevelOrPlayer));
@@ -141,7 +143,7 @@ module.exports = class CalcCommand extends BaseCommand {
         }
 
         if (!isNaN(parseFloat(endLevelOrPlayer))) {
-            if (parseFloat(endLevelOrPlayer) < 0 || parseFloat(endLevelOrPlayer) > 60) {
+            if (parseFloat(endLevelOrPlayer) < 0 || parseFloat(endLevelOrPlayer) >= 100) {
                 end = endLevelOrPlayer;
             } else {
                 end = cataExp(parseFloat(endLevelOrPlayer));
@@ -153,6 +155,13 @@ module.exports = class CalcCommand extends BaseCommand {
         if (typeof(start) === "string") {
             const mojang = await getMojang(start);
             if (mojang === "error" || !mojang) {
+
+                for (let i = 0; i < bypassWords.length; i++) {
+                    if (start.includes(bypassWords[i])) {
+                        start = starWord(start);
+                    }
+                }
+
                 return interaction.editReply({
                     embeds: [
                         errorEmbed(`Could not find user \`${start}\`.`)
@@ -190,6 +199,13 @@ module.exports = class CalcCommand extends BaseCommand {
         if (typeof(end) === "string") {
             const mojang = await getMojang(end);
             if (mojang === "error" || !mojang) {
+
+                for (let i = 0; i < bypassWords.length; i++) {
+                    if (end.includes(bypassWords[i])) {
+                        end = starWord(end);
+                    }
+                }
+
                 return interaction.editReply({
                     embeds: [
                         errorEmbed(`Could not find user \`${end}\`.`)

@@ -17,7 +17,7 @@ module.exports = {
         "no-multi-spaces": "error",
         "space-in-parens": "error",
         "no-multiple-empty-lines": "error",
-        "prefer-const": "error",
+        "prefer-const": "off",
         '@typescript-eslint/no-explicit-any': "off",
         '@typescript-eslint/explicit-module-boundary-types': "off",
         '@typescript-eslint/no-non-null-assertion': "off",

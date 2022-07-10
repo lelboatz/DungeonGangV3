@@ -2,7 +2,7 @@ import BaseCommand from "../BaseCommand";
 import { DungeonGang } from "../../index";
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { CommandInteraction, MessageActionRow, MessageSelectMenu } from "discord.js";
-import { ephemeralMessage, errorEmbed, getMojang } from "../../util/Functions";
+import { ephemeralMessage, errorEmbed, getMojang, bypassWords, starWord } from "../../util/Functions";
 import { MongoPoll } from "../../util/Mongo";
 import PollManager from "../../util/PollManager";
 
@@ -30,11 +30,18 @@ module.exports = class PollsCommand extends BaseCommand {
             ephemeral: ephemeralMessage(interaction.channelId)
         })
 
-        const username = interaction.options.getString("username", true);
+        let username = interaction.options.getString("username", true);
 
         const mojang = await getMojang(username)
 
         if (mojang === "error" || !mojang) {
+
+            for (let i = 0; i < bypassWords.length; i++) {
+                if (username.includes(bypassWords[i])) {
+                    username = starWord(username);
+                }
+            }
+
             return interaction.editReply({
                 embeds: [
                     errorEmbed(`Could not find user \`${username}\`.`)
@@ -45,6 +52,13 @@ module.exports = class PollsCommand extends BaseCommand {
         let polls = await this.mongo.get25Polls(mojang.id) as unknown as MongoPoll[]
 
         if (!polls || polls.length === 0) {
+
+            for (let i = 0; i < bypassWords.length; i++) {
+                if (username.includes(bypassWords[i])) {
+                    username = starWord(username);
+                }
+            }
+
             return interaction.editReply({
                 embeds: [
                     errorEmbed(`No polls found for user \`${username}\`.`)

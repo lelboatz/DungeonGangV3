@@ -70,16 +70,16 @@ class PollManager {
                 cataLevel: 0,
                 secrets: player.achievements.skyblock_treasure_hunter ?? 0,
                 bloodMobs: 0,
-                masterSix: undefined,
-                masterSixCompletions: 0,
+                masterSeven: undefined,
+                masterSevenCompletions: 0,
             }
         } else {
             stats = {
                 cataLevel: cataLevel(profile.members[mojang.id].dungeons?.dungeon_types.catacombs.experience ?? 0),
                 secrets: player.achievements.skyblock_treasure_hunter ?? 0,
                 bloodMobs: (profile.members[mojang.id].stats.kills_watcher_summon_undead ?? 0) + (profile.members[mojang.id].stats.kills_watcher_summon_skeleton ?? 0) + (profile.members[mojang.id].stats.kills_master_watcher_summon_undead ?? 0),
-                masterSix: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs?.fastest_time_s_plus?.[6] ?? undefined,
-                masterSixCompletions: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs?.tier_completions?.[6] ?? 0,
+                masterSeven: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs?.fastest_time_s_plus?.[7] ?? undefined,
+                masterSevenCompletions: profile.members[mojang.id].dungeons?.dungeon_types.master_catacombs?.tier_completions?.[7] ?? 0,
             }
         }
 
@@ -122,13 +122,13 @@ class PollManager {
                                 "inline": true
                             },
                             {
-                                "name": "**Master 6 S+ PB**",
-                                "value": stats.masterSix ? fmtMSS(stats.masterSix) : "N/A",
+                                "name": "**Master 7 S+ PB**",
+                                "value": stats.masterSeven ? fmtMSS(stats.masterSeven) : "N/A",
                                 "inline": true
                             },
                             {
-                                "name": "**Master 6 Completions**",
-                                "value": stats.masterSixCompletions.toString(),
+                                "name": "**Master 7 Completions**",
+                                "value": stats.masterSevenCompletions.toString(),
                                 "inline": true
                             },
                             {
@@ -445,13 +445,13 @@ class PollManager {
                     "inline": true
                 },
                 {
-                    "name": "**Master 6 S+ PB**",
-                    "value": poll.stats.masterSix ? fmtMSS(poll.stats.masterSix) : "N/A",
+                    "name": "**Master 7 S+ PB**",
+                    "value": poll.stats.masterSeven ? fmtMSS(poll.stats.masterSeven) : "N/A",
                     "inline": true
                 },
                 {
-                    "name": "**Master 6 Completions**",
-                    "value": poll.stats.masterSixCompletions.toString(),
+                    "name": "**Master 7 Completions**",
+                    "value": poll.stats.masterSevenCompletions.toString(),
                     "inline": true
                 },
                 {
@@ -506,13 +506,13 @@ class PollManager {
                     "inline": true
                 },
                 {
-                    "name": "**Master 6 S+ PB**",
-                    "value": poll.stats.masterSix ? fmtMSS(poll.stats.masterSix) : "N/A",
+                    "name": "**Master 7 S+ PB**",
+                    "value": poll.stats.masterSeven ? fmtMSS(poll.stats.masterSeven) : "N/A",
                     "inline": true
                 },
                 {
-                    "name": "**Master 6 Completions**",
-                    "value": poll.stats.masterSixCompletions.toString(),
+                    "name": "**Master 7 Completions**",
+                    "value": poll.stats.masterSevenCompletions.toString(),
                     "inline": true
                 },
                 {
