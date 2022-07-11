@@ -512,7 +512,7 @@ class PollManager {
                 },
                 {
                     "name": "**Master 7 Completions**",
-                    "value": poll.stats.masterSevenCompletions ? poll.stats.masterSevenCompletions.toString() : "N/A",
+                    "value": poll.stats.masterSevenCompletions !== undefined ? poll.stats.masterSevenCompletions.toString() : "N/A",
                     "inline": true
                 },
                 {
