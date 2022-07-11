@@ -295,129 +295,129 @@ class PollManager {
         const votes = poll.votes;
 
         switch (interaction.customId) {
-            case "POSITIVE_VOTE": {
-                const member = interaction.member as GuildMember
-                if (member.roles.cache.has(this.client.config.discord.roles.misc.pollBlacklist)) {
-                    return interaction.editReply({
-                        content: "You are blacklisted from voting in polls."
-                    })
+                case "POSITIVE_VOTE": {
+                    const member = interaction.member as GuildMember
+                    if (member.roles.cache.has(this.client.config.discord.roles.misc.pollBlacklist)) {
+                        return interaction.editReply({
+                            content: "You are blacklisted from voting in polls."
+                        })
+                    }
+                    if (!member.roles.cache.has(this.client.config.discord.roles.topPlayer.plus)) {
+                        return interaction.editReply({
+                            content: "You must be a top player+ to vote in this poll."
+                        })
+                    }
+                    if (votes.negative.includes(interaction.user.id)) {
+                        votes.negative.splice(votes.negative.indexOf(interaction.user.id), 1);
+                        votes.positive.push(interaction.user.id);
+                        await interaction.editReply({
+                            content: "Vote changed from 👎 to 👍"
+                        })
+                    } else if (votes.neutral.includes(interaction.user.id)) {
+                        votes.neutral.splice(votes.neutral.indexOf(interaction.user.id), 1);
+                        votes.positive.push(interaction.user.id);
+                        await interaction.editReply({
+                            content: "Vote changed from 🤐 to 👍"
+                        })
+                    } else if (!votes.positive.includes(interaction.user.id)) {
+                        votes.positive.push(interaction.user.id);
+                        await interaction.editReply({
+                            content: "Your vote has been recorded as 👍"
+                        })
+                    } else {
+                        votes.positive.splice(votes.positive.indexOf(interaction.user.id), 1);
+                        await interaction.editReply({
+                            content: "Your 👍 vote has been removed"
+                        })
+                    }
+                    break;
                 }
-                if (!member.roles.cache.has(this.client.config.discord.roles.topPlayer.plus)) {
-                    return interaction.editReply({
-                        content: "You must be a top player+ to vote in this poll."
-                    })
+                case "NEUTRAL_VOTE": {
+                    const member = interaction.member as GuildMember
+                    if (member.roles.cache.has(this.client.config.discord.roles.misc.pollBlacklist)) {
+                        return interaction.editReply({
+                            content: "You are blacklisted from voting in polls."
+                        })
+                    }
+                    if (!member.roles.cache.has(this.client.config.discord.roles.topPlayer.plus)) {
+                        return interaction.editReply({
+                            content: "You must be a top player+ to vote in this poll."
+                        })
+                    }
+                    if (votes.negative.includes(interaction.user.id)) {
+                        votes.negative.splice(votes.negative.indexOf(interaction.user.id), 1);
+                        votes.neutral.push(interaction.user.id);
+                        await interaction.editReply({
+                            content: "Vote changed from 👎 to 🤐"
+                        })
+                    } else if (votes.positive.includes(interaction.user.id)) {
+                        votes.positive.splice(votes.positive.indexOf(interaction.user.id), 1);
+                        votes.neutral.push(interaction.user.id);
+                        await interaction.editReply({
+                            content: "Vote changed from 👍 to 🤐"
+                        })
+                    } else if (!votes.neutral.includes(interaction.user.id)) {
+                        votes.neutral.push(interaction.user.id);
+                        await interaction.editReply({
+                            content: "Your vote has been recorded as 🤐"
+                        })
+                    } else {
+                        votes.neutral.splice(votes.neutral.indexOf(interaction.user.id), 1);
+                        await interaction.editReply({
+                            content: "Your 🤐 vote has been removed"
+                        })
+                    }
+                    break;
                 }
-                if (votes.negative.includes(interaction.user.id)) {
-                    votes.negative.splice(votes.negative.indexOf(interaction.user.id), 1);
-                    votes.positive.push(interaction.user.id);
-                    await interaction.editReply({
-                        content: "Vote changed from 👎 to 👍"
-                    })
-                } else if (votes.neutral.includes(interaction.user.id)) {
-                    votes.neutral.splice(votes.neutral.indexOf(interaction.user.id), 1);
-                    votes.positive.push(interaction.user.id);
-                    await interaction.editReply({
-                        content: "Vote changed from 🤐 to 👍"
-                    })
-                } else if (!votes.positive.includes(interaction.user.id)) {
-                    votes.positive.push(interaction.user.id);
-                    await interaction.editReply({
-                        content: "Your vote has been recorded as 👍"
-                    })
-                } else {
-                    votes.positive.splice(votes.positive.indexOf(interaction.user.id), 1);
-                    await interaction.editReply({
-                        content: "Your 👍 vote has been removed"
-                    })
+                case "NEGATIVE_VOTE": {
+                    const member = interaction.member as GuildMember
+                    if (member.roles.cache.has(this.client.config.discord.roles.misc.pollBlacklist)) {
+                        return interaction.editReply({
+                            content: "You are blacklisted from voting in polls."
+                        })
+                    }
+                    if (!member.roles.cache.has(this.client.config.discord.roles.topPlayer.plus)) {
+                        return interaction.editReply({
+                            content: "You must be a top player+ to vote in this poll."
+                        })
+                    }
+                    if (votes.positive.includes(interaction.user.id)) {
+                        votes.positive.splice(votes.positive.indexOf(interaction.user.id), 1);
+                        votes.negative.push(interaction.user.id);
+                        await interaction.editReply({
+                            content: "Vote changed from 👍 to 👎"
+                        })
+                    } else if (votes.neutral.includes(interaction.user.id)) {
+                        votes.neutral.splice(votes.neutral.indexOf(interaction.user.id), 1);
+                        votes.negative.push(interaction.user.id);
+                        await interaction.editReply({
+                            content: "Vote changed from 🤐 to 👎"
+                        })
+                    } else if (!votes.negative.includes(interaction.user.id)) {
+                        votes.negative.push(interaction.user.id);
+                        await interaction.editReply({
+                            content: "Your vote has been recorded as 👎"
+                        })
+                    } else {
+                        votes.negative.splice(votes.negative.indexOf(interaction.user.id), 1);
+                        await interaction.editReply({
+                            content: "Your 👎 vote has been removed"
+                        })
+                    }
+                    break;
                 }
-                break;
-            }
-            case "NEUTRAL_VOTE": {
-                const member = interaction.member as GuildMember
-                if (member.roles.cache.has(this.client.config.discord.roles.misc.pollBlacklist)) {
-                    return interaction.editReply({
-                        content: "You are blacklisted from voting in polls."
-                    })
-                }
-                if (!member.roles.cache.has(this.client.config.discord.roles.topPlayer.plus)) {
-                    return interaction.editReply({
-                        content: "You must be a top player+ to vote in this poll."
-                    })
-                }
-                if (votes.negative.includes(interaction.user.id)) {
-                    votes.negative.splice(votes.negative.indexOf(interaction.user.id), 1);
-                    votes.neutral.push(interaction.user.id);
-                    await interaction.editReply({
-                        content: "Vote changed from 👎 to 🤐"
-                    })
-                } else if (votes.positive.includes(interaction.user.id)) {
-                    votes.positive.splice(votes.positive.indexOf(interaction.user.id), 1);
-                    votes.neutral.push(interaction.user.id);
-                    await interaction.editReply({
-                        content: "Vote changed from 👍 to 🤐"
-                    })
-                } else if (!votes.neutral.includes(interaction.user.id)) {
-                    votes.neutral.push(interaction.user.id);
-                    await interaction.editReply({
-                        content: "Your vote has been recorded as 🤐"
-                    })
-                } else {
-                    votes.neutral.splice(votes.neutral.indexOf(interaction.user.id), 1);
-                    await interaction.editReply({
-                        content: "Your 🤐 vote has been removed"
-                    })
-                }
-                break;
-            }
-            case "NEGATIVE_VOTE": {
-                const member = interaction.member as GuildMember
-                if (member.roles.cache.has(this.client.config.discord.roles.misc.pollBlacklist)) {
-                    return interaction.editReply({
-                        content: "You are blacklisted from voting in polls."
-                    })
-                }
-                if (!member.roles.cache.has(this.client.config.discord.roles.topPlayer.plus)) {
-                    return interaction.editReply({
-                        content: "You must be a top player+ to vote in this poll."
-                    })
-                }
-                if (votes.positive.includes(interaction.user.id)) {
-                    votes.positive.splice(votes.positive.indexOf(interaction.user.id), 1);
-                    votes.negative.push(interaction.user.id);
-                    await interaction.editReply({
-                        content: "Vote changed from 👍 to 👎"
-                    })
-                } else if (votes.neutral.includes(interaction.user.id)) {
-                    votes.neutral.splice(votes.neutral.indexOf(interaction.user.id), 1);
-                    votes.negative.push(interaction.user.id);
-                    await interaction.editReply({
-                        content: "Vote changed from 🤐 to 👎"
-                    })
-                } else if (!votes.negative.includes(interaction.user.id)) {
-                    votes.negative.push(interaction.user.id);
-                    await interaction.editReply({
-                        content: "Your vote has been recorded as 👎"
-                    })
-                } else {
-                    votes.negative.splice(votes.negative.indexOf(interaction.user.id), 1);
-                    await interaction.editReply({
-                        content: "Your 👎 vote has been removed"
-                    })
-                }
-                break;
-            }
-            case "END_POLL": {
-                if (this.client.getPermissionLevel(interaction.member as GuildMember | null) < 1) {
-                    return interaction.editReply({
-                        content: "You don't have permission to end the poll"
-                    })
-                }
-                await this.endPoll(interaction.message.id);
+                case "END_POLL": {
+                    if (this.client.getPermissionLevel(interaction.member as GuildMember | null) < 1) {
+                        return interaction.editReply({
+                            content: "You don't have permission to end the poll"
+                        })
+                    }
+                    await this.endPoll(interaction.message.id);
 
-                return interaction.editReply({
-                    content: "Successfully ended poll."
-                })
-            }
+                    return interaction.editReply({
+                        content: "Successfully ended poll."
+                    })
+                }
         }
         return this.client.mongo.updateVotes(poll._id, votes);
     }
@@ -512,7 +512,7 @@ class PollManager {
                 },
                 {
                     "name": "**Master 7 Completions**",
-                    "value": poll.stats.masterSevenCompletions.toString(),
+                    "value": poll.stats.masterSevenCompletions ? poll.stats.masterSevenCompletions.toString() : "N/A",
                     "inline": true
                 },
                 {

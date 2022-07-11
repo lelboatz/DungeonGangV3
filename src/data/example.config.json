@@ -75,7 +75,7 @@
         "secretDuper": ""
       },
       "fixRoles": ["", ""], // Roles that will be given with the /fix command
-      "member": "" // Member role id
+      "verified": "" // Member role id
     }
   },
   "minecraft": {

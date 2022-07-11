@@ -71,7 +71,7 @@ class VerificationManager {
         this.client = client;
     }
 
-    async verify(username: string, member: GuildMember, options: VerifyOptions ) {
+    async verify(username: string, member: GuildMember, options: VerifyOptions) {
 
         let mojang;
         if (!options.forceUpdate) {
@@ -157,6 +157,10 @@ class VerificationManager {
                 if (!roles.includes(this.client.config.discord.roles.cata["35"])) {
                     roles.push(this.client.config.discord.roles.cata["35"]);
                 }
+            }
+
+            if (!roles.includes(this.client.config.discord.roles.verified)) {
+                roles.push(this.client.config.discord.roles.verified);
             }
 
             if (!roles.includes(this.client.config.discord.roles.member)) {
@@ -347,9 +351,9 @@ class VerificationManager {
         }
 
         let tpp = this.meetsTopPlusReqs(dungeons, {
-            votedOut: user?.votedOut ?? false,
-            votedIn: user?.votedIn ?? false,
-        }), tp = this.meetsTopNormalReqs(dungeons), tpm = this.meetsTopMinusReqs(dungeons), speedrunner = this.meetsSpeedrunnerReqs(dungeons) && tpp, secretDuper = this.meetsSecretDuperReqs(dungeons);
+                votedOut: user?.votedOut ?? false,
+                votedIn: user?.votedIn ?? false,
+            }), tp = this.meetsTopNormalReqs(dungeons), tpm = this.meetsTopMinusReqs(dungeons), speedrunner = this.meetsSpeedrunnerReqs(dungeons) && tpp, secretDuper = this.meetsSecretDuperReqs(dungeons);
 
         if (tpp || tp) tpm = false;
         if (tpp) tp = true;
@@ -452,8 +456,8 @@ class VerificationManager {
         let nickname = `❮${dungeons.cataLevel}❯ ${mojang.name} ${emojis}`;
         if (symbol) nickname = nickname.replace(/[❮❯]/g, symbol)
 
-        if (!rolesArray.includes(this.client.config.discord.roles.member)) {
-            rolesArray.push(this.client.config.discord.roles.member)
+        if (!rolesArray.includes(this.client.config.discord.roles.verified)) {
+            rolesArray.push(this.client.config.discord.roles.verified)
         }
 
         const oldRoles = this.arrayRoleIds(member.roles)
@@ -495,7 +499,7 @@ class VerificationManager {
         const logChannel = client.channels.cache.get(client.config.discord.logChannel) as TextChannel
         const rolesRemoved = data.rolesBefore.filter(role => !data.rolesAfter.includes(role)).map(role => `<@&${role}>`).join("")
         const rolesAdded = data.rolesAfter.filter(role => !data.rolesBefore.includes(role)).map(role => `<@&${role}>`).join("")
-        const stats = ( data.stats ? "Catacombs Level: " + data.cataLevel
+        const stats = (data.stats ? "Catacombs Level: " + data.cataLevel
             + "\nSecrets: " + data.stats.secrets
             + "\nBlood Mob Kills: " + data.stats.bloodMobs
             + "\nMaster Six S+: " + (data.stats.masterSix ? fmtMSS(data.stats.masterSix!) : "N/A")
@@ -662,7 +666,7 @@ class VerificationManager {
             meetsMasterSeven = true
         }
 
-        return ( meetsMasterFive || meetsMasterSix || meetsMasterSeven)
+        return (meetsMasterFive || meetsMasterSix || meetsMasterSeven)
     }
 
     meetsSecretDuperReqs(dungeons: VerifyDungeonData) {
