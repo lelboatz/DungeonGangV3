@@ -460,6 +460,10 @@ class VerificationManager {
             rolesArray.push(this.client.config.discord.roles.verified)
         }
 
+        if (!rolesArray.includes(this.client.config.discord.roles.member)) {
+            rolesArray.push(this.client.config.discord.roles.member);
+        }
+
         const oldRoles = this.arrayRoleIds(member.roles)
 
         await member.edit({
